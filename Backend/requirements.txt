@@ -1,0 +1,25 @@
+# Core database dependencies
+sqlalchemy>=2.0.0,<3.0.0
+alembic>=1.8.0,<2.0.0
+
+# Database drivers
+# SQLite (included with Python)
+# PostgreSQL
+psycopg2-binary>=2.9.0,<3.0.0
+# MySQL
+pymysql>=1.0.0,<2.0.0
+# Oracle
+cx-oracle>=8.3.0,<9.0.0
+# SQL Server
+pyodbc>=4.0.0,<5.0.0
+
+# Utility dependencies
+python-dateutil>=2.8.0,<3.0.0
+typing-extensions>=4.0.0,<5.0.0
+
+# Development and testing (optional)
+pytest>=7.0.0,<8.0.0
+pytest-cov>=4.0.0,<5.0.0
+black>=22.0.0,<24.0.0
+flake8>=5.0.0,<6.0.0
+mypy>=1.0.0,<2.0.0 
