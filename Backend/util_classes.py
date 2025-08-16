@@ -109,16 +109,25 @@ class CustomSkill(BaseSkill):
     evidence: str = Field(description="Direct quote or paraphrased section of the interview that supports the inference.")
 
 class ESCOSkill(BaseSkill):
-    className: str
     uri: str
-    searchHit: str
     title: str
-    preferredLabel: Dict[str, str]
-    isTopConceptInScheme: List[str]
-    isInScheme: List[str]
-    hasSkillType: List[str]
-    hasReuseLevel: List[str]
-    broaderHierarchyConcept: List[str]
+    reference_language: str
+    preferred_label: Dict[str, str]
+    description: Dict[str, str]
+    links: dict
+
+    def __str__(self) -> str:
+        return self.title
+    
+    def __repr__(self) -> str:
+        return self.title
+
+    def get_preferred_label(self, language: str) -> str:
+        return self.preferred_label.get(language, self.title)
+    
+    def get_description(self, language: str) -> str:
+        return self.description.get(language, "No description available")
+ 
 
 class SkillList(BaseModel):
     skills: List[BaseSkill]
@@ -135,16 +144,50 @@ class CustomSkillList(SkillList):
 class ESCOSkillList(SkillList):
     skills: List[ESCOSkill]
 
-    def to_json(self) -> str:
+    def to_json(self, language: str = "en") -> str:
         string = "["
         for i, skill in enumerate(self.skills):
             string += f"{{\n"
             string += f"\t\"id\": {i},\n"
-            string += f"\t\"title\": \"{skill.title}\",\n"
-            string += f"\t\"description\": \"{skill.searchHit}\"\n"
+            string += f"\t\"title\": \"{skill.get_preferred_label(language)}\",\n"
+            string += f"\t\"description\": \"{skill.get_description(language)}\"\n"
             string += f"}}"
             if i < len(self.skills) - 1:
                 string += ",\n"
         string += "]"
         return string
 
+class BaseSkillDatabaseHandler(ABC):
+    def __init__(self, url: str):
+        self.url = url
+
+class ESCODatabase(BaseSkillDatabaseHandler):
+    def __init__(self, 
+        url: str ="https://ec.europa.eu/esco/api",
+        language: str = "en"
+    ):
+        super().__init__(url.rstrip('/'))
+        self.language = language
+
+    def search_skills(self, text: str, limit: int = 20) -> List[ESCOSkill]:
+        url = f"{self.url}/search"
+        params = {
+            "text": text,
+            "language": self.language,
+            "type": "skill",
+            "limit": limit,
+            "full": True
+        }
+        response = requests.get(url, params=params)
+
+        skill_list = []
+        for skill in response.json()["_embedded"]["results"]:
+            skill_list.append(ESCOSkill(
+                uri=skill["uri"],
+                title=skill["title"],
+                reference_language=skill["referenceLanguage"][0],
+                preferred_label=skill["preferredLabel"],
+                description={desc[0]: desc[1]["literal"] for desc in skill["description"].items()},
+                links=skill["_links"]
+            ))
+        return skill_list
