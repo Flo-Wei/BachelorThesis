@@ -35,21 +35,26 @@ prompts:
     Output schema: {output_schema}
 
   information_mapper: |
-    You are an expert at mapping extracted information to predefined categories and examples. Your task is to find the best match from a list of examples.
+    You are mapping a skill extracted from a job interview to the most similar skill from a database of standardized skills.
+
+    ------------------------------
     
-    Extracted Information: {extracted_info}
-    Available Examples: {available_examples}
-    Mapping Criteria: {mapping_criteria}
+    Extracted Skill: {skill.name} ({skill.type})
+    Evidence: {skill.evidence}
     
-    Instructions:
-    - Analyze the extracted information carefully
-    - Compare it against each available example
-    - Identify the best matching example based on similarity
-    - Consider multiple factors: content, context, structure, and intent
-    - Provide confidence level for your mapping
-    - If no good match exists, indicate this clearly
+    ------------------------------
+
+    Available Skills in Database:
+    {available_skills}
+
+    ------------------------------
     
-    Similarity Factors: {similarity_factors}
-    Confidence Threshold: {confidence_threshold}
+    Please analyze the extracted skill and find the best match from the available skills. Consider:
+    - Semantic similarity between skill names
+    - Relevance of descriptions
+    - Skill type alignment
+    - Context from the evidence provided
+
+    ------------------------------
     
-    Please map the extracted information to the most fitting example from the provided list.
+    Return the ID of the best matching skill from the available skills list.

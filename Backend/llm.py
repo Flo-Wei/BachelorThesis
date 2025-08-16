@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any, List
 from ModelConfigClasses import ModelConfigOpenAI, ModelConfig
 from util_classes import ChatHistory, LLMMessage, BaseSkill, CustomSkill, CustomSkillList
+from utils import get_prompt
 
 class BaseLLM(ABC):
     def __init__(self, model_name: str, config: ModelConfig):
@@ -74,3 +75,37 @@ class OpenAILLM(BaseLLM):
             text_format=CustomSkillList,
         )
         return response.output_parsed.skills
+    
+    def map_skill(
+        self,
+        instruction: str,
+        skill: CustomSkill,
+        available_skills: List[BaseSkill]
+    ) -> BaseSkill:
+        
+        mapping_prompt = get_prompt("information_mapper").format(skill=skill, available_skills=available_skills.to_json())
+        
+        response = self.client.responses.create(
+            model=self.model_name,
+            input=mapping_prompt,
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "skill_id",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "description": "The ID of the best matching skill from the available skills list."
+                            }
+                        },
+                        "required": ["id"],
+                        "additionalProperties": False
+                    },
+                    "strict": True
+                }
+            }
+        )
+        
+        return available_skills.get_skill_by_id(response.output_text["id"])

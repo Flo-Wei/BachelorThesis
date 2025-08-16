@@ -1,7 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Literal, Optional, Dict, List
+from abc import ABC, abstractmethod
 from datetime import datetime
 from openai.types.responses.response import Response as OpenAIResponse
+import requests
 
 class LLMUsage(BaseModel):
     prompt_tokens: int
@@ -121,5 +123,28 @@ class ESCOSkill(BaseSkill):
 class SkillList(BaseModel):
     skills: List[BaseSkill]
 
+    def to_json(self) -> str:
+        pass
+    
+    def get_skill_by_id(self, id: int) -> BaseSkill:
+        return self.skills[id]
+
 class CustomSkillList(SkillList):
     skills: List[CustomSkill]
+
+class ESCOSkillList(SkillList):
+    skills: List[ESCOSkill]
+
+    def to_json(self) -> str:
+        string = "["
+        for i, skill in enumerate(self.skills):
+            string += f"{{\n"
+            string += f"\t\"id\": {i},\n"
+            string += f"\t\"title\": \"{skill.title}\",\n"
+            string += f"\t\"description\": \"{skill.searchHit}\"\n"
+            string += f"}}"
+            if i < len(self.skills) - 1:
+                string += ",\n"
+        string += "]"
+        return string
+
