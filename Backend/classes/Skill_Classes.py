@@ -1,0 +1,61 @@
+from pydantic import BaseModel, Field
+from typing import Literal, Dict, List
+
+
+class BaseSkill(BaseModel):
+    pass
+
+class CustomSkill(BaseSkill):
+    name: str
+    type: Literal["technical", "soft", "domain-specific", "other"]
+    confidence: float = Field(ge=0, le=1)
+    evidence: str = Field(description="Direct quote or paraphrased section of the interview that supports the inference.")
+
+class ESCOSkill(BaseSkill):
+    uri: str
+    title: str
+    reference_language: str
+    preferred_label: Dict[str, str]
+    description: Dict[str, str]
+    links: dict
+
+    def __str__(self) -> str:
+        return self.title
+    
+    def __repr__(self) -> str:
+        return self.title
+
+    def get_preferred_label(self, language: str) -> str:
+        return self.preferred_label.get(language, self.title)
+    
+    def get_description(self, language: str) -> str:
+        return self.description.get(language, "No description available")
+ 
+
+class SkillList(BaseModel):
+    skills: List[BaseSkill]
+
+    def to_json(self) -> str:
+        pass
+    
+    def get_skill_by_id(self, id: int) -> BaseSkill:
+        return self.skills[id]
+
+class CustomSkillList(SkillList):
+    skills: List[CustomSkill]
+
+class ESCOSkillList(SkillList):
+    skills: List[ESCOSkill]
+
+    def to_json(self, language: str = "en") -> str:
+        string = "["
+        for i, skill in enumerate(self.skills):
+            string += f"{{\n"
+            string += f"\t\"id\": {i},\n"
+            string += f"\t\"title\": \"{skill.get_preferred_label(language)}\",\n"
+            string += f"\t\"description\": \"{skill.get_description(language)}\"\n"
+            string += f"}}"
+            if i < len(self.skills) - 1:
+                string += ",\n"
+        string += "]"
+        return string
