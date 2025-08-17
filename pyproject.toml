@@ -9,5 +9,7 @@ dependencies = [
     "ipykernel",
     "dotenv",
     "PyYAML",
-    "requests"
+    "requests",
+    "fastapi",
+    "uvicorn[standard]",
 ]

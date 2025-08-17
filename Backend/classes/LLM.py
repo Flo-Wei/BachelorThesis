@@ -3,10 +3,10 @@ from openai.types.responses.response import Response as OpenAIResponse
 import os
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any, List
-from Model_Config import ModelConfigOpenAI, ModelConfig
-from LLM_Message import ChatHistory, LLMMessage
-from Skill_Classes import BaseSkill, CustomSkill, CustomSkillList
-from utils import get_prompt
+from Backend.classes.LLM_Message import ChatHistory, LLMMessage
+from Backend.classes.Model_Config import ModelConfigOpenAI, ModelConfig
+from Backend.classes.Skill_Classes import BaseSkill, CustomSkill, CustomSkillList
+from Backend.utils import get_prompt
 
 class BaseLLM(ABC):
     def __init__(self, model_name: str, config: ModelConfig):
