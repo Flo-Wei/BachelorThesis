@@ -14,7 +14,17 @@ def main():
     # Start the FastAPI server
     try:
         print("Starting FastAPI server on http://localhost:8000")
-        subprocess.run([sys.executable, "websocket_server.py"])
+        print("Open your browser and go to: http://localhost:8000")
+        print("Press Ctrl+C to stop the server")
+        
+        # Use the module import string to avoid the reload warning
+        subprocess.run([
+            sys.executable, "-m", "uvicorn", 
+            "websocket_server:app", 
+            "--host", "localhost", 
+            "--port", "8000", 
+            "--reload"
+        ])
     except KeyboardInterrupt:
         print("\nServer stopped")
     except Exception as e:

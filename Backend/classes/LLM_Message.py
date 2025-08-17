@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Literal
+from typing import Literal, Optional
 from datetime import datetime
 from openai.types.responses.response import Response as OpenAIResponse
 
@@ -20,9 +20,9 @@ class LLMUsage(BaseModel):
 class LLMMessage(BaseModel):
     role: Literal["system", "assistant", "user"]
     content: str
-    created_at: datetime
-    model: str
-    usage: LLMUsage
+    created_at: datetime = datetime.now()
+    model: Optional[str] = None
+    usage: Optional[LLMUsage] = None
 
     def __str__(self):
         return f"{self.created_at.strftime('%Y-%m-%d %H:%M:%S')} {self.role}: {self.content}"
@@ -44,9 +44,9 @@ class LLMMessage(BaseModel):
         )
 
 class ChatHistory(BaseModel):
-    messages: list[LLMMessage]
-    created_at: datetime
-    updated_at: datetime
+    messages: list[LLMMessage] = []
+    created_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now()
 
     def __str__(self):
         return "\n".join([str(message) for message in self.messages])

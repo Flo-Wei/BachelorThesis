@@ -9,9 +9,9 @@ from Backend.classes.Skill_Classes import BaseSkill, CustomSkill, CustomSkillLis
 from Backend.utils import get_prompt
 
 class BaseLLM(ABC):
-    def __init__(self, model_name: str, config: ModelConfig):
+    def __init__(self, model_name: str, config: Optional[ModelConfig] = None):
         self.model_name: str = model_name
-        self.config: ModelConfig = config
+        self.config: Optional[ModelConfig] = config
     
     @abstractmethod
     def chat(
@@ -39,7 +39,7 @@ class BaseLLM(ABC):
 
 
 class OpenAILLM(BaseLLM):
-    def __init__(self, model_name: str, config: ModelConfigOpenAI):
+    def __init__(self, model_name: str, config: Optional[ModelConfigOpenAI] = None):
         super().__init__(model_name, config)
 
         api_key = os.getenv("OPENAI_API_KEY")
@@ -51,10 +51,10 @@ class OpenAILLM(BaseLLM):
         self, 
         chat_history: ChatHistory) -> LLMMessage: 
 
-        config = self.config.to_dict()
+        config = self.config.to_dict() if self.config else {}
         response = self.client.responses.create(
             model=self.model_name,
-            messages=chat_history.to_openai_input(),
+            input=chat_history.to_openai_input(),
             **config
         )
         return LLMMessage.from_openai_message(response)

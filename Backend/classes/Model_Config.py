@@ -2,11 +2,11 @@ from pydantic import BaseModel, Field
 from typing import Optional, Literal
 
 class ModelConfig(BaseModel):
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="Controls randomness of the model output")
+    temperature: Optional[float] = Field(default=0.7, ge=0.0, le=2.0, description="Controls randomness of the model output")
     max_tokens: Optional[int] = Field(default=None, ge=1, description="Maximum number of tokens to generate")
-    top_p: float = Field(default=1.0, ge=0.0, le=1.0, description="Controls diversity via nucleus sampling")
-    frequency_penalty: float = Field(default=0.0, ge=-2.0, le=2.0, description="Reduces repetition of frequent tokens")
-    presence_penalty: float = Field(default=0.0, ge=-2.0, le=2.0, description="Reduces repetition of any tokens")
+    top_p: Optional[float] = Field(default=1.0, ge=0.0, le=1.0, description="Controls diversity via nucleus sampling")
+    # frequency_penalty: float = Field(default=0.0, ge=-2.0, le=2.0, description="Reduces repetition of frequent tokens")
+    # presence_penalty: float = Field(default=0.0, ge=-2.0, le=2.0, description="Reduces repetition of any tokens")
     stop: Optional[list[str]] = Field(default=None, description="Stop generation when these strings are encountered")
     
     def to_dict(self) -> dict:

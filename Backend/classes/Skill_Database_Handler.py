@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 import requests
-from Skill_Classes import ESCOSkill
+from Backend.classes.Skill_Classes import ESCOSkill
 
 
 class BaseSkillDatabaseHandler(ABC):

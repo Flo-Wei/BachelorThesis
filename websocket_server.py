@@ -10,6 +10,12 @@ import uvicorn  # This is the server that actually runs our FastAPI app
 import json  # For converting data between Python and text format
 import logging  # For keeping track of what's happening (like a diary)
 from pathlib import Path  # For working with file paths
+from Backend.classes.LLM import OpenAILLM
+from Backend.classes.Model_Config import ModelConfigOpenAI
+from Backend.classes.LLM_Message import ChatHistory, LLMMessage
+from Backend.classes.Skill_Classes import BaseSkill, CustomSkill, CustomSkillList
+from Backend.classes.Skill_Database_Handler import ESCODatabase
+from Backend.utils import get_prompt
 
 # Set up logging - this creates a diary of what's happening in your server
 logging.basicConfig(level=logging.INFO)  # INFO level means "tell me about important stuff"
@@ -61,6 +67,7 @@ class ConnectionManager:
 
 # Create one manager to handle all connections
 manager = ConnectionManager()
+llm = OpenAILLM(model_name="gpt-4.1-2025-04-14") # TODO: Add config
 
 # This route serves the main webpage when someone visits your website
 @app.get("/", response_class=HTMLResponse)
@@ -82,7 +89,8 @@ async def health_check():
     """Simple health check"""
     return {
         "status": "ok",  # Server is working fine
-        "connections": len(manager.active_connections)  # How many people are currently chatting
+        "connections": len(manager.active_connections),  # How many people are currently chatting
+        "llm_available": llm is not None  # Whether the AI model is working
     }
 
 # This is the main chat endpoint - it handles real-time communication
@@ -93,6 +101,9 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)  # Add them to our list
     
     try:
+        chat_history = ChatHistory()
+        chat_history.add_message(LLMMessage(role="system", content=get_prompt("interviewer")))
+
         # Keep listening for messages from this person
         while True:
             # Wait for them to send a message
@@ -106,13 +117,18 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 if message_type == 'message':
                     # If they sent a chat message
-                    
+                    chat_history.add_message(LLMMessage(role="user", content=content))
+
                     # RIGHT NOW: We just echo back what they said
                     # THIS IS WHERE YOU PUT YOUR LLM CODE!
                     # Instead of echoing, you'd call your AI model here
+                    
+                    response_message = llm.chat(chat_history)
+                    chat_history.add_message(response_message)
+                    
                     response = {
                         'type': 'message',  # This is a chat message
-                        'content': f"Echo: {content}",  # Right now just repeats what they said
+                        'content': response_message.content,  # Right now just repeats what they said
                         'timestamp': message_data.get('timestamp', '')  # When they sent it
                     }
                     
