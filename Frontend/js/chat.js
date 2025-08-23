@@ -131,12 +131,17 @@ function renderSessionsList() {
         const sessionName = session.session_name || 'New Chat';
         
         return `
-            <button class="session-item ${isActive ? 'active' : ''}" 
-                    data-session-id="${session.session_id}"
-                    onclick="selectSession(${session.session_id})">
-                <div class="session-title">${sessionName}</div>
-                <div class="session-preview">Session from ${UIUtils.formatTimeAgo(session.created_at)}</div>
-            </button>
+            <div class="session-item ${isActive ? 'active' : ''}" data-session-id="${session.session_id}">
+                <div class="session-content" onclick="selectSession(${session.session_id})">
+                    <div class="session-title">${sessionName}</div>
+                    <div class="session-preview">Session from ${UIUtils.formatTimeAgo(session.created_at)}</div>
+                </div>
+                <div class="session-actions">
+                    <button class="session-action-btn" onclick="renameSession(${session.session_id}, '${sessionName.replace(/'/g, "\\'")}')">
+                        ✏️
+                    </button>
+                </div>
+            </div>
         `;
     }).join('');
 
@@ -293,8 +298,17 @@ async function createNewChat() {
     const user = api.getCurrentUser();
     if (!user) return;
 
+    // Prompt user for chat name
+    const chatName = prompt('Enter a name for your new chat:', 'New Chat');
+    
+    // If user cancels or enters empty string, don't create chat
+    if (chatName === null) return;
+    
+    // Use default name if user enters empty string
+    const sessionName = chatName.trim() || 'New Chat';
+
     try {
-        const session = await api.createSession(user.user_id, 'New Chat');
+        const session = await api.createSession(user.user_id, sessionName);
         
         // Add to sessions list
         userSessions.unshift(session);
@@ -346,8 +360,42 @@ function exportChat() {
     URL.revokeObjectURL(url);
 }
 
-// Make selectSession global so it can be called from onclick
+async function renameSession(sessionId, currentName) {
+    // Prompt user for new name
+    const newName = prompt('Enter a new name for this chat:', currentName);
+    
+    // If user cancels or enters empty string, don't rename
+    if (newName === null || newName.trim() === currentName.trim()) return;
+    
+    // Use default name if user enters empty string
+    const sessionName = newName.trim() || 'New Chat';
+
+    try {
+        await api.updateSession(sessionId, sessionName);
+        
+        // Update local session data
+        const sessionIndex = userSessions.findIndex(s => s.session_id === sessionId);
+        if (sessionIndex !== -1) {
+            userSessions[sessionIndex].session_name = sessionName;
+            renderSessionsList();
+            
+            // Update chat title if this is the current session
+            if (currentSessionId === sessionId) {
+                chatTitle.textContent = sessionName;
+            }
+        }
+        
+        showSystemMessage(`Chat renamed to "${sessionName}"`, 'info');
+        
+    } catch (error) {
+        console.error('Error renaming chat:', error);
+        showSystemMessage('Failed to rename chat', 'error');
+    }
+}
+
+// Make functions global so they can be called from onclick
 window.selectSession = selectSession;
+window.renameSession = renameSession;
 
 // Periodic connection check
 setInterval(checkConnectionStatus, 30000);

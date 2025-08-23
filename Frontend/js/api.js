@@ -118,6 +118,13 @@ class APIClient {
         return await this.request(`/sessions/${sessionId}/messages`);
     }
 
+    async updateSession(sessionId, sessionName) {
+        return await this.request(`/sessions/${sessionId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ session_name: sessionName })
+        });
+    }
+
     // ===== CHAT =====
 
     async sendMessage(userId, message, sessionId = null) {

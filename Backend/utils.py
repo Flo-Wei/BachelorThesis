@@ -7,6 +7,8 @@ from typing import Literal
 load_dotenv()
 
 def get_prompt(prompt_name: Literal["interviewer", "information_extractor", "information_mapper"]) -> str:
-    with open(Path(os.getenv("PROMPT_FILE")), "r") as f:
+    # Default to prompts.yaml in Backend directory if PROMPT_FILE env var is not set
+    prompt_file = os.getenv("PROMPT_FILE", "Backend/prompts.yaml")
+    with open(Path(prompt_file), "r") as f:
         file = yaml.safe_load(f)
         return file["prompts"][prompt_name]

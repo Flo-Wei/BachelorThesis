@@ -3,10 +3,14 @@ from openai.types.responses.response import Response as OpenAIResponse
 import os
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any, List
-from Backend.classes.LLM_Message import ChatHistory, LLMMessage
+from sqlmodel import Session
+from Backend.database.models.messages import ChatSession, ChatMessage, MessageType
+from Backend.database.models.skills import ChatSkillBase, ESCOSkillModel
 from Backend.classes.Model_Config import ModelConfigOpenAI, ModelConfig
-from Backend.classes.Skill_Classes import BaseSkill, CustomSkill, CustomSkillList
+from Backend.classes.Skill_Classes import BaseSkill, CustomSkill, ESCOSkill, CustomSkillList
 from Backend.utils import get_prompt
+import logging
+import json
 
 class BaseLLM(ABC):
     def __init__(self, model_name: str, config: Optional[ModelConfig] = None):
@@ -16,15 +20,16 @@ class BaseLLM(ABC):
     @abstractmethod
     def chat(
         self, 
-        chat_history: ChatHistory
-    ) -> LLMMessage:
+        chat_session: ChatSession,
+        db_session: Session
+    ) -> ChatMessage:
         pass
     
     @abstractmethod
     def extract_skills(
         self,
         instruction: str,
-        messages: LLMMessage
+        message: ChatMessage
     ) -> List[CustomSkill]:
         pass
 
@@ -49,20 +54,34 @@ class OpenAILLM(BaseLLM):
 
     def chat(
         self, 
-        chat_history: ChatHistory) -> LLMMessage: 
+        chat_session: ChatSession,
+        db_session: Session
+    ) -> ChatMessage: 
 
         config = self.config.to_dict() if self.config else {}
         response = self.client.responses.create(
             model=self.model_name,
-            input=chat_history.to_openai_input(),
+            input=chat_session.to_openai_input(),
             **config
         )
-        return LLMMessage.from_openai_message(response)
+        
+        # Create ChatMessage from OpenAI response
+        assistant_message = ChatMessage.from_openai_message(chat_session, response)
+        assistant_message.session_id = chat_session.session_id
+        assistant_message.role = MessageType.ASSISTANT
+        
+        # Save to database
+        db_session.add(assistant_message)
+        db_session.commit()
+        db_session.refresh(assistant_message)
+        db_session.refresh(chat_session)  # Refresh to update chat_messages relationship
+        
+        return assistant_message
 
     def extract_skills(
         self,
         instruction: str,
-        messages: LLMMessage
+        message: ChatMessage
     ) -> List[CustomSkill]:
         response = self.client.responses.parse(
             model=self.model_name,
@@ -70,7 +89,7 @@ class OpenAILLM(BaseLLM):
                 {"role": "system", "content": instruction},
                 {
                     "role": "user",
-                    "content": messages.content,
+                    "content": message.message_content,
                 },
             ],
             text_format=CustomSkillList,
@@ -82,9 +101,9 @@ class OpenAILLM(BaseLLM):
         instruction: str,
         skill: CustomSkill,
         available_skills: List[BaseSkill]
-    ) -> BaseSkill:
+    ) -> ChatSkillBase:
         
-        mapping_prompt = get_prompt("information_mapper").format(skill=skill, available_skills=available_skills.to_json())
+        mapping_prompt = get_prompt("information_mapper").format(skill=skill, available_skills=available_skills)
         
         response = self.client.responses.create(
             model=self.model_name,
@@ -108,5 +127,15 @@ class OpenAILLM(BaseLLM):
                 }
             }
         )
+        response_dict = json.loads(response.output_text)
         
-        return available_skills.get_skill_by_id(response.output_text["id"])
+        logging.info(f"response_type: {type(response_dict)}")
+        logging.info(f"response.output_text: {response_dict}")
+        id = int(response_dict["id"])
+        logging.info(f"id: {id} id_type: {type(id)}")
+        skill = available_skills[id]
+
+        if isinstance(skill, ESCOSkill):
+            return ESCOSkillModel.from_pydantic(skill)
+        else:
+            raise NotImplementedError(f"Mapping for skill type {type(skill)} is not implemented")

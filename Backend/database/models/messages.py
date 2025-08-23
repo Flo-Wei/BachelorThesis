@@ -6,7 +6,7 @@ from openai.types.responses.response import Response as OpenAIResponse
 
 if TYPE_CHECKING:
     from Backend.database.models.users import User
-    from Backend.database.models.skills import ESCOSkill
+    from Backend.database.models.skills import ESCOSkillModel
 
 
 class MessageType(str, Enum):
@@ -26,7 +26,7 @@ class ChatSession(SQLModel, table=True):
     # Relationships
     user: "User" = Relationship(back_populates="chat_sessions")
     chat_messages: List["ChatMessage"] = Relationship(back_populates="chat_session")
-    esco_skills: List["ESCOSkill"] = Relationship(back_populates="chat_session")
+    esco_skills: List["ESCOSkillModel"] = Relationship(back_populates="chat_session")
 
     # Methods
     def __str__(self):
@@ -70,12 +70,7 @@ class ChatSession(SQLModel, table=True):
         return [
             {
                 "role": message.role.value,  # Convert enum to string
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": message.message_content
-                    }
-                ]
+                "content": message.message_content  # Simple string format
             }
             for message in messages
         ]
@@ -94,7 +89,7 @@ class ChatMessage(SQLModel, table=True):
     
     # Relationships
     chat_session: "ChatSession" = Relationship(back_populates="chat_messages")
-    derived_skills_esco: List["ESCOSkill"] = Relationship(back_populates="origin_message")
+    derived_skills_esco: List["ESCOSkillModel"] = Relationship(back_populates="origin_message")
 
     # Methods
     def __str__(self):
@@ -104,8 +99,9 @@ class ChatMessage(SQLModel, table=True):
         return f"ChatMessage(role={self.role}, message_content={self.message_content}, timestamp={self.timestamp})"
 
     @classmethod
-    def from_openai_message(cls, message: OpenAIResponse):
+    def from_openai_message(cls,session: "ChatSession", message: OpenAIResponse):
         return cls(
+            session_id=session.session_id,
             role=message.output[0].role,
             message_content=message.output[0].content[0].text, # TODO: reasoning models don work yet because of multiple content objects
             timestamp=datetime.fromtimestamp(message.created_at),

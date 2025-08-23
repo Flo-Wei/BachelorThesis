@@ -3,6 +3,7 @@ from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import JSON
 from typing import Optional, Dict, Any, TYPE_CHECKING
 from datetime import datetime
+from Backend.classes.Skill_Classes import ESCOSkill, BaseSkill
 
 if TYPE_CHECKING:
     from Backend.database.models.messages import ChatMessage, ChatSession
@@ -17,7 +18,11 @@ class ChatSkillBase(SQLModel):
     origin_message_id: int = Field(foreign_key="chat_message.message_id", index=True)
     skill_system: SkillSystem = Field(index=True)
 
-class ESCOSkill(ChatSkillBase, table=True):
+    @classmethod
+    def from_pydantic(cls, skill: BaseSkill) -> "ChatSkillBase":
+        pass
+
+class ESCOSkillModel(ChatSkillBase, table=True):
     __tablename__ = "esco_skill"
     
     uri: str = Field(max_length=255)
@@ -47,3 +52,14 @@ class ESCOSkill(ChatSkillBase, table=True):
     def get_description(self, language: str) -> str:
         """Get the description for a specific language, fallback to default message if not available"""
         return self.description.get(language, "No description available")
+    
+    @classmethod
+    def from_pydantic(cls, skill: ESCOSkill) -> "ESCOSkillModel":
+        return cls(
+            uri=skill.uri,
+            title=skill.title,
+            reference_language=skill.reference_language,
+            preferred_label=skill.preferred_label,
+            description=skill.description,
+            links=skill.links
+        )

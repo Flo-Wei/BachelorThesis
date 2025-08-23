@@ -6,7 +6,8 @@ import logging
 
 from Backend.database.models.users import User
 from Backend.database.models.messages import ChatSession, ChatMessage, MessageType
-from Backend.database.models.skills import ESCOSkill
+from Backend.database.models.skills import ESCOSkillModel
+from Backend.utils import get_prompt
 from .init import db_manager
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ def create_user(username: str, email: str, session: Optional[Session] = None) ->
 
 
 def create_chat_session(user: User, session_name: str = None, session: Optional[Session] = None) -> ChatSession:
-    """Create a new chat session for a user.
+    """Create a new chat session for a user with an initial system prompt.
     
     Args:
         user: The user to create the session for
@@ -50,13 +51,27 @@ def create_chat_session(user: User, session_name: str = None, session: Optional[
         session: Optional database session. If None, creates and manages session automatically.
     
     Returns:
-        The created ChatSession object
+        The created ChatSession object with initial system message
     """
     def _create_chat_session(db_session: Session) -> ChatSession:
+        # Create the chat session
         chat_session = ChatSession(user_id=user.user_id, session_name=session_name)
         db_session.add(chat_session)
         db_session.commit()
         db_session.refresh(chat_session)
+        
+        # Add the initial system prompt message
+        system_prompt = get_prompt("interviewer")
+        system_message = ChatMessage(
+            session_id=chat_session.session_id,
+            message_content=system_prompt,
+            role=MessageType.SYSTEM
+        )
+        db_session.add(system_message)
+        db_session.commit()
+        db_session.refresh(system_message)
+        db_session.refresh(chat_session)  # Refresh to update chat_messages relationship
+        
         return chat_session
     
     if session is not None:
@@ -125,7 +140,7 @@ def add_esco_skill(
     description: dict = None,
     links: dict = None,
     session: Optional[Session] = None
-) -> ESCOSkill:
+) -> ESCOSkillModel:
     """Add an ESCO skill identified from a message.
     
     Args:
@@ -140,9 +155,9 @@ def add_esco_skill(
         session: Optional database session. If None, creates and manages session automatically.
     
     Returns:
-        The created ESCOSkill object
+        The created ESCOSkillModel object
     """
-    def _add_esco_skill(db_session: Session) -> ESCOSkill:
+    def _add_esco_skill(db_session: Session) -> ESCOSkillModel:
         # If objects are not attached to this session, merge them
         session_obj = chat_session
         message_obj = origin_message
@@ -151,7 +166,7 @@ def add_esco_skill(
         if message_obj not in db_session:
             message_obj = db_session.merge(message_obj)
             
-        skill = ESCOSkill(
+        skill = ESCOSkillModel(
             session_id=session_obj.session_id,
             origin_message_id=message_obj.message_id,
             uri=uri,

@@ -35,27 +35,11 @@ class ESCOSkill(BaseSkill):
 class SkillList(BaseModel):
     skills: List[BaseSkill]
 
-    def to_json(self) -> str:
-        pass
-    
     def get_skill_by_id(self, id: int) -> BaseSkill:
         return self.skills[id]
 
 class CustomSkillList(SkillList):
     skills: List[CustomSkill]
 
-class ESCOSkillList(SkillList):
-    skills: List[ESCOSkill]
-
-    def to_json(self, language: str = "en") -> str:
-        string = "["
-        for i, skill in enumerate(self.skills):
-            string += f"{{\n"
-            string += f"\t\"id\": {i},\n"
-            string += f"\t\"title\": \"{skill.get_preferred_label(language)}\",\n"
-            string += f"\t\"description\": \"{skill.get_description(language)}\"\n"
-            string += f"}}"
-            if i < len(self.skills) - 1:
-                string += ",\n"
-        string += "]"
-        return string
+    def get_skill_by_id(self, id: int) -> CustomSkill:
+        return self.skills[id]

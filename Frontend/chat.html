@@ -59,17 +59,23 @@
         }
         
         .session-item {
-            padding: 12px 20px;
             margin: 2px 10px;
             border-radius: 6px;
-            cursor: pointer;
             transition: background 0.2s ease;
             border: none;
             background: none;
             color: #bdc3c7;
-            text-align: left;
             width: calc(100% - 20px);
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .session-content {
+            flex: 1;
+            padding: 12px 20px;
+            cursor: pointer;
         }
         
         .session-item:hover {
@@ -96,6 +102,32 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        
+        .session-actions {
+            padding: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .session-item:hover .session-actions {
+            opacity: 1;
+        }
+        
+        .session-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #bdc3c7;
+            transition: all 0.2s ease;
+        }
+        
+        .session-action-btn:hover {
+            background: #3498db;
+            color: white;
         }
         
         .chat-main {
