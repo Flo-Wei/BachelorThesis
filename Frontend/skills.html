@@ -624,7 +624,283 @@
         </div>
     </footer>
 
-    <!-- Note: JavaScript functionality will be added in the next phase -->
-    <!-- This is just the HTML/CSS structure as requested -->
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script>
+        // State management
+        let currentSessionId = null;
+        let currentSkillSystem = 'ESCO';
+        let currentLanguage = 'en';
+        let userSessions = [];
+
+        // DOM elements
+        const skillSystemSelector = document.getElementById('skillSystemSelector');
+        const sessionsList = document.getElementById('sessionsList');
+        const skillsTitle = document.getElementById('skillsTitle');
+        const skillsMeta = document.getElementById('skillsMeta');
+        const totalSkills = document.getElementById('totalSkills');
+        const currentSkillSystemSpan = document.getElementById('currentSkillSystem');
+        const lastUpdated = document.getElementById('lastUpdated');
+        const skillsGrid = document.getElementById('skillsGrid');
+        const skillsContent = document.getElementById('skillsContent');
+        const emptyState = document.getElementById('emptyState');
+        const languageFilter = document.getElementById('languageFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!AuthUtils.requireAuth()) return;
+            
+            initializePage();
+            setupEventListeners();
+        });
+
+        function initializePage() {
+            const user = api.getCurrentUser();
+            if (user) {
+                userAvatar.textContent = user.username[0].toUpperCase();
+                userName.textContent = user.username;
+            }
+
+            loadSkillSystems();
+            loadUserSessions();
+        }
+
+        function setupEventListeners() {
+            skillSystemSelector.addEventListener('change', handleSkillSystemChange);
+            languageFilter.addEventListener('change', handleLanguageChange);
+            sortFilter.addEventListener('change', handleSortChange);
+            
+            // Action buttons
+            document.getElementById('exportSkillsBtn').addEventListener('click', exportSkills);
+            document.getElementById('refreshSkillsBtn').addEventListener('click', refreshSkills);
+        }
+
+        async function loadSkillSystems() {
+            try {
+                const systems = await api.getSkillSystems();
+                skillSystemSelector.innerHTML = systems.map(system => 
+                    `<option value="${system}">${system} Skills</option>`
+                ).join('');
+                
+                currentSkillSystem = systems[0] || 'ESCO';
+                currentSkillSystemSpan.textContent = currentSkillSystem;
+                
+            } catch (error) {
+                console.error('Error loading skill systems:', error);
+            }
+        }
+
+        async function loadUserSessions() {
+            const user = api.getCurrentUser();
+            if (!user) return;
+
+            try {
+                UIUtils.showLoading(sessionsList);
+                userSessions = await api.getUserSessions(user.user_id);
+                
+                if (userSessions.length === 0) {
+                    sessionsList.innerHTML = `
+                        <div style="padding: 20px; text-align: center; color: #95a5a6;">
+                            <p>No chat sessions found.</p>
+                            <a href="chat.html" style="color: #3498db;">Start chatting</a>
+                        </div>
+                    `;
+                    showEmptyState();
+                    return;
+                }
+
+                renderSessionsList();
+                
+                // Select first session by default
+                if (userSessions.length > 0) {
+                    selectSession(userSessions[0].session_id);
+                }
+                
+            } catch (error) {
+                UIUtils.showError(sessionsList, 'Failed to load chat sessions');
+                console.error('Error loading sessions:', error);
+            }
+        }
+
+        function renderSessionsList() {
+            const sessionsHTML = userSessions.map(session => {
+                const skillsCount = session.esco_skills ? session.esco_skills.length : 0;
+                const isActive = session.session_id === currentSessionId;
+                
+                return `
+                    <button class="session-item ${isActive ? 'active' : ''}" 
+                            data-session-id="${session.session_id}"
+                            onclick="selectSession(${session.session_id})">
+                        <div class="session-title">${session.session_name || 'Untitled Session'}</div>
+                        <div class="session-skills-count">${skillsCount} skills extracted</div>
+                    </button>
+                `;
+            }).join('');
+
+            sessionsList.innerHTML = sessionsHTML;
+        }
+
+        async function selectSession(sessionId) {
+            currentSessionId = sessionId;
+            
+            // Update UI to show selected session
+            document.querySelectorAll('.session-item').forEach(item => {
+                item.classList.remove('active');
+                if (parseInt(item.dataset.sessionId) === sessionId) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Update header
+            const session = userSessions.find(s => s.session_id === sessionId);
+            if (session) {
+                skillsTitle.textContent = `${session.session_name || 'Untitled Session'} - ${currentSkillSystem} Skills`;
+                skillsMeta.textContent = `Session from ${UIUtils.formatDate(session.created_at)}`;
+            }
+
+            // Load skills for this session
+            await loadSessionSkills();
+        }
+
+        async function loadSessionSkills() {
+            if (!currentSessionId) return;
+
+            try {
+                UIUtils.showLoading(skillsContent);
+                
+                const skills = await api.getSessionSkills(currentSessionId, currentSkillSystem);
+                
+                if (skills.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                renderSkills(skills);
+                updateStats(skills);
+                
+            } catch (error) {
+                UIUtils.showError(skillsContent, 'Failed to load skills');
+                console.error('Error loading skills:', error);
+            }
+        }
+
+        function renderSkills(skills) {
+            let filteredSkills = [...skills];
+            
+            // Apply sorting
+            const sortBy = sortFilter.value;
+            filteredSkills.sort((a, b) => {
+                switch (sortBy) {
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    case 'relevance':
+                        return b.id - a.id; // Reverse ID order as proxy for relevance
+                    case 'extracted':
+                        return b.id - a.id; // Most recent first
+                    default:
+                        return 0;
+                }
+            });
+
+            const skillsHTML = filteredSkills.map(skill => {
+                const description = getLocalizedText(skill.description, currentLanguage);
+                const title = getLocalizedText(skill.preferred_label, currentLanguage) || skill.title;
+                
+                return `
+                    <div class="skill-card">
+                        <div class="skill-header">
+                            <h3 class="skill-title">${title}</h3>
+                            <span class="skill-system-badge">${skill.skill_system}</span>
+                        </div>
+                        <div class="skill-description">
+                            ${description || 'No description available'}
+                        </div>
+                        <div class="skill-meta">
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">URI:</span>
+                                <a href="${skill.uri}" target="_blank" class="skill-uri">${skill.uri}</a>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Language:</span>
+                                <span>${skill.reference_language}</span>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Extracted from:</span>
+                                <span>Message #${skill.origin_message_id}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            skillsGrid.innerHTML = skillsHTML;
+            skillsContent.innerHTML = `<div class="skills-grid">${skillsHTML}</div>`;
+            emptyState.style.display = 'none';
+        }
+
+        function getLocalizedText(textObj, language) {
+            if (!textObj || typeof textObj !== 'object') return '';
+            return textObj[language] || textObj['en'] || Object.values(textObj)[0] || '';
+        }
+
+        function updateStats(skills) {
+            totalSkills.textContent = skills.length;
+            currentSkillSystemSpan.textContent = currentSkillSystem;
+            lastUpdated.textContent = UIUtils.formatTimeAgo(new Date().toISOString());
+        }
+
+        function showEmptyState() {
+            skillsGrid.innerHTML = '';
+            emptyState.style.display = 'block';
+            skillsContent.appendChild(emptyState);
+            
+            totalSkills.textContent = '0';
+            lastUpdated.textContent = 'No data';
+        }
+
+        function handleSkillSystemChange() {
+            currentSkillSystem = skillSystemSelector.value;
+            currentSkillSystemSpan.textContent = currentSkillSystem;
+            
+            if (currentSessionId) {
+                const session = userSessions.find(s => s.session_id === currentSessionId);
+                if (session) {
+                    skillsTitle.textContent = `${session.session_name || 'Untitled Session'} - ${currentSkillSystem} Skills`;
+                }
+            }
+            
+            loadSessionSkills();
+        }
+
+        function handleLanguageChange() {
+            currentLanguage = languageFilter.value;
+            if (currentSessionId) {
+                loadSessionSkills();
+            }
+        }
+
+        function handleSortChange() {
+            if (currentSessionId) {
+                loadSessionSkills();
+            }
+        }
+
+        async function refreshSkills() {
+            if (currentSessionId) {
+                await loadSessionSkills();
+            }
+        }
+
+        function exportSkills() {
+            // Placeholder for export functionality
+            alert('Export functionality will be implemented in a future update.');
+        }
+
+        // Make selectSession global so it can be called from onclick
+        window.selectSession = selectSession;
+    </script>
 </body>
 </html>

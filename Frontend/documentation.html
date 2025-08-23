@@ -215,20 +215,18 @@
         </div>
     </footer>
 
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
     <script>
-        // Simple API status check
+        // API status check using our API client
         async function checkApiStatus() {
             const statusIndicator = document.getElementById('apiStatus');
             const statusText = document.getElementById('apiStatusText');
             
             try {
-                const response = await fetch('http://localhost:8000/docs');
-                if (response.ok) {
-                    statusIndicator.className = 'status-indicator status-online';
-                    statusText.textContent = 'API Server Online';
-                } else {
-                    throw new Error('API not responding');
-                }
+                await api.healthCheck();
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'API Server Online';
             } catch (error) {
                 statusIndicator.className = 'status-indicator status-offline';
                 statusText.textContent = 'API Server Offline - Start with: uv run python app.py';
@@ -237,6 +235,9 @@
         
         // Check status when page loads
         document.addEventListener('DOMContentLoaded', checkApiStatus);
+        
+        // Refresh status every 30 seconds
+        setInterval(checkApiStatus, 30000);
     </script>
 </body>
 </html>

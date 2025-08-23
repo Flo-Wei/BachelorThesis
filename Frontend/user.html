@@ -331,7 +331,225 @@
         </div>
     </footer>
 
-    <!-- Note: JavaScript functionality will be added in the next phase -->
-    <!-- This is just the HTML/CSS structure as requested -->
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script>
+        // State management
+        let isLoginMode = true;
+
+        // DOM elements
+        const authSection = document.getElementById('authSection');
+        const profileSection = document.getElementById('profileSection');
+        const authTitle = document.getElementById('authTitle');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authSwitchLink = document.getElementById('authSwitchLink');
+        const messageContainer = document.getElementById('messageContainer');
+
+        // Profile elements
+        const profileUsername = document.getElementById('profileUsername');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileUserId = document.getElementById('profileUserId');
+        const profileCreatedAt = document.getElementById('profileCreatedAt');
+        const userGreeting = document.getElementById('userGreeting');
+        const sessionsContainer = document.getElementById('sessionsContainer');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            setupEventListeners();
+        });
+
+        function checkAuthStatus() {
+            if (api.isAuthenticated()) {
+                showProfile();
+                loadUserProfile();
+                loadUserSessions();
+            } else {
+                showAuth();
+            }
+        }
+
+        function setupEventListeners() {
+            // Auth form switching
+            authSwitchLink.addEventListener('click', toggleAuthMode);
+
+            // Form submissions
+            loginForm.addEventListener('submit', handleLogin);
+            registerForm.addEventListener('submit', handleRegister);
+
+            // Logout button
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            
+            if (isLoginMode) {
+                authTitle.textContent = 'Login to Your Account';
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                authSwitchText.textContent = "Don't have an account?";
+                authSwitchLink.textContent = 'Register here';
+            } else {
+                authTitle.textContent = 'Create New Account';
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                authSwitchText.textContent = 'Already have an account?';
+                authSwitchLink.textContent = 'Login here';
+            }
+            
+            clearMessages();
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            
+            if (!username.trim()) {
+                showMessage('Please enter a username', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Logging in...', 'info');
+                await api.loginUser(username);
+                showMessage('Login successful!', 'success');
+                
+                setTimeout(() => {
+                    showProfile();
+                    loadUserProfile();
+                    loadUserSessions();
+                }, 1000);
+                
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            
+            if (!username.trim() || !email.trim()) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Creating account...', 'info');
+                await api.registerUser(username, email);
+                showMessage('Account created successfully! You can now login.', 'success');
+                
+                // Switch to login mode
+                document.getElementById('loginUsername').value = username;
+                toggleAuthMode();
+                
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                AuthUtils.logout();
+            }
+        }
+
+        function showAuth() {
+            authSection.classList.remove('hidden');
+            profileSection.classList.add('hidden');
+        }
+
+        function showProfile() {
+            authSection.classList.add('hidden');
+            profileSection.classList.remove('hidden');
+        }
+
+        async function loadUserProfile() {
+            const user = api.getCurrentUser();
+            if (!user) return;
+
+            try {
+                // Update profile information
+                profileUsername.textContent = user.username;
+                profileEmail.textContent = user.email;
+                profileUserId.textContent = user.user_id;
+                profileCreatedAt.textContent = UIUtils.formatDate(user.created_at);
+                userGreeting.textContent = `Welcome back, ${user.username}!`;
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        async function loadUserSessions() {
+            const user = api.getCurrentUser();
+            if (!user) return;
+
+            try {
+                UIUtils.showLoading(sessionsContainer);
+                const sessions = await api.getUserSessions(user.user_id);
+                
+                if (sessions.length === 0) {
+                    sessionsContainer.innerHTML = `
+                        <div class="text-center" style="padding: 20px; color: #666;">
+                            <p>No chat sessions yet.</p>
+                            <a href="chat.html" class="btn">Start Your First Chat</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const sessionsHTML = sessions.map(session => `
+                    <div class="session-card">
+                        <div class="session-name">${session.session_name || 'Untitled Session'}</div>
+                        <div class="session-meta">
+                            Created: ${UIUtils.formatDate(session.created_at)} | 
+                            Skills: ${session.esco_skills.length} extracted
+                        </div>
+                    </div>
+                `).join('');
+
+                sessionsContainer.innerHTML = sessionsHTML;
+                
+            } catch (error) {
+                UIUtils.showError(sessionsContainer, 'Failed to load chat sessions');
+                console.error('Error loading sessions:', error);
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            const className = type === 'error' ? 'error-message' : 
+                             type === 'success' ? 'success-message' : 'info-message';
+            
+            messageContainer.innerHTML = `
+                <div class="${className}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function clearMessages() {
+            messageContainer.innerHTML = '';
+        }
+
+        // Add info message styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .info-message {
+                background: #e8f4fd;
+                color: #0c5460;
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+                border: 1px solid #bee5eb;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

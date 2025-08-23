@@ -1,7 +1,7 @@
 """Pydantic schemas for API request/response models."""
 
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 
@@ -69,3 +69,36 @@ class ChatResponse(BaseModel):
     message: MessageResponse
     assistant_response: MessageResponse
     session_id: int
+
+
+# Token schemas
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserResponse
+
+
+# Skills schemas
+from Backend.database.models.skills import SkillSystem
+
+class SkillResponse(BaseModel):
+    id: int
+    skill_system: SkillSystem
+    uri: str
+    title: str
+    reference_language: str
+    preferred_label: Dict[str, str]
+    description: Dict[str, str]
+    links: Dict[str, Any]
+    origin_message_id: int
+    session_id: int
+    
+    class Config:
+        from_attributes = True
+
+
+class ChatSessionWithSkillsResponse(ChatSessionResponse):
+    esco_skills: List[SkillResponse] = []
+    
+    class Config:
+        from_attributes = True

@@ -14,5 +14,7 @@ dependencies = [
     "uvicorn[standard]",
     "sqlalchemy>=2",
     "sqlmodel",
-    "pydantic[email]"
+    "pydantic[email]",
+    "pyjwt",
+    "passlib[bcrypt]"
 ]

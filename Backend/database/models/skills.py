@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class SkillSystem(str, Enum):
     ESCO = "ESCO"
-    FREIWILLIGENPASS = "Freiwilligenpass"
+    # FREIWILLIGENPASS = "Freiwilligenpass"
 
 class ChatSkillBase(SQLModel):
     id: Optional[int] = Field(default=None, primary_key=True)

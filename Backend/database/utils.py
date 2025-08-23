@@ -7,7 +7,7 @@ import logging
 from Backend.database.models.users import User
 from Backend.database.models.messages import ChatSession, ChatMessage, MessageType
 from Backend.database.models.skills import ESCOSkill
-from .init import get_db_session
+from .init import db_manager
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def create_user(username: str, email: str, session: Optional[Session] = None) ->
         return _create_user(session)
     
     try:
-        with get_db_session() as db_session:
+        with db_manager.get_session() as db_session:
             return _create_user(db_session)
     except Exception as e:
         logger.error(f"Failed to create user {username}: {e}")
@@ -63,7 +63,7 @@ def create_chat_session(user: User, session_name: str = None, session: Optional[
         return _create_chat_session(session)
     
     try:
-        with get_db_session() as db_session:
+        with db_manager.get_session() as db_session:
             return _create_chat_session(db_session)
     except Exception as e:
         logger.error(f"Failed to create chat session for user {user.user_id}: {e}")
@@ -108,7 +108,7 @@ def add_message(
         return _add_message(session)
     
     try:
-        with get_db_session() as db_session:
+        with db_manager.get_session() as db_session:
             return _add_message(db_session)
     except Exception as e:
         logger.error(f"Failed to add message to session {chat_session.session_id}: {e}")
@@ -172,7 +172,7 @@ def add_esco_skill(
         return _add_esco_skill(session)
     
     try:
-        with get_db_session() as db_session:
+        with db_manager.get_session() as db_session:
             return _add_esco_skill(db_session)
     except Exception as e:
         logger.error(f"Failed to add ESCO skill {title}: {e}")
