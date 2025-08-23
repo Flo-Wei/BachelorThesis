@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from Backend.database.init import init_database, get_db_session
+from Backend.database.init import init_database, get_db_session_dependency
 from Backend.database.models.users import User
 from Backend.database.models.messages import ChatSession, ChatMessage, MessageType
 from Backend.database.utils import (
@@ -55,7 +55,7 @@ app = FastAPI(
 # ==============================================================================
 
 @app.post("/users/register", response_model=UserResponse)
-async def register_user(user_data: UserCreate, db: Session = Depends(get_db_session)):
+async def register_user(user_data: UserCreate, db: Session = Depends(get_db_session_dependency)):
     """Register a new user."""
     # Check if user already exists
     existing_user = db.exec(
@@ -90,7 +90,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db_sess
 
 
 @app.post("/users/login", response_model=UserResponse)
-async def login_user(login_data: UserLogin, db: Session = Depends(get_db_session)):
+async def login_user(login_data: UserLogin, db: Session = Depends(get_db_session_dependency)):
     """Login user (simplified - just find by username)."""
     user = db.exec(select(User).where(User.username == login_data.username)).first()
     
@@ -104,7 +104,7 @@ async def login_user(login_data: UserLogin, db: Session = Depends(get_db_session
 
 
 @app.get("/users/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, db: Session = Depends(get_db_session)):
+async def get_user(user_id: int, db: Session = Depends(get_db_session_dependency)):
     """Get user by ID."""
     user = db.get(User, user_id)
     if not user:
@@ -116,7 +116,7 @@ async def get_user(user_id: int, db: Session = Depends(get_db_session)):
 
 
 @app.get("/users", response_model=List[UserResponse])
-async def list_users(db: Session = Depends(get_db_session)):
+async def list_users(db: Session = Depends(get_db_session_dependency)):
     """List all users (for testing/admin purposes)."""
     users = db.exec(select(User)).all()
     return users
@@ -130,7 +130,7 @@ async def list_users(db: Session = Depends(get_db_session)):
 async def create_session(
     user_id: int, 
     session_data: ChatSessionCreate, 
-    db: Session = Depends(get_db_session)
+    db: Session = Depends(get_db_session_dependency)
 ):
     """Create a new chat session for a user."""
     # Verify user exists
@@ -153,7 +153,7 @@ async def create_session(
 
 
 @app.get("/users/{user_id}/sessions", response_model=List[ChatSessionResponse])
-async def get_user_sessions(user_id: int, db: Session = Depends(get_db_session)):
+async def get_user_sessions(user_id: int, db: Session = Depends(get_db_session_dependency)):
     """Get all chat sessions for a user."""
     user = db.get(User, user_id)
     if not user:
@@ -169,7 +169,7 @@ async def get_user_sessions(user_id: int, db: Session = Depends(get_db_session))
 
 
 @app.get("/sessions/{session_id}", response_model=ChatSessionResponse)
-async def get_session(session_id: int, db: Session = Depends(get_db_session)):
+async def get_session(session_id: int, db: Session = Depends(get_db_session_dependency)):
     """Get a specific chat session."""
     session = db.get(ChatSession, session_id)
     if not session:
@@ -181,7 +181,7 @@ async def get_session(session_id: int, db: Session = Depends(get_db_session)):
 
 
 @app.get("/sessions/{session_id}/messages", response_model=List[MessageResponse])
-async def get_session_messages(session_id: int, db: Session = Depends(get_db_session)):
+async def get_session_messages(session_id: int, db: Session = Depends(get_db_session_dependency)):
     """Get all messages for a chat session."""
     session = db.get(ChatSession, session_id)
     if not session:
@@ -206,7 +206,7 @@ async def get_session_messages(session_id: int, db: Session = Depends(get_db_ses
 async def chat_with_user(
     user_id: int,
     chat_request: ChatRequest,
-    db: Session = Depends(get_db_session)
+    db: Session = Depends(get_db_session_dependency)
 ):
     """Process a chat message for a user."""
     # Verify user exists

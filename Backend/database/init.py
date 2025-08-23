@@ -88,6 +88,10 @@ def init_database():
     db_manager.initialize_database()
 
 def get_db_session():
-    """Get a database session."""
+    """Get a database session context manager for use with 'with' statements."""
+    return db_manager.get_session()
+
+def get_db_session_dependency():
+    """Get a database session for FastAPI dependency injection."""
     with db_manager.get_session() as session:
         yield session

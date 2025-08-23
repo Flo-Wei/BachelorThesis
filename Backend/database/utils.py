@@ -88,15 +88,20 @@ def add_message(
         The created ChatMessage object
     """
     def _add_message(db_session: Session) -> ChatMessage:
+        # If chat_session is not attached to this session, merge it
+        session_obj = chat_session
+        if session_obj not in db_session:
+            session_obj = db_session.merge(session_obj)
+        
         message = ChatMessage(
-            session_id=chat_session.session_id,
+            session_id=session_obj.session_id,
             message_content=content,
             role=message_type
         )
         db_session.add(message)
         db_session.commit()
         db_session.refresh(message)
-        db_session.refresh(chat_session)  # Refresh to update chat_messages relationship
+        db_session.refresh(session_obj)  # Refresh to update chat_messages relationship
         return message
     
     if session is not None:
@@ -138,9 +143,17 @@ def add_esco_skill(
         The created ESCOSkill object
     """
     def _add_esco_skill(db_session: Session) -> ESCOSkill:
+        # If objects are not attached to this session, merge them
+        session_obj = chat_session
+        message_obj = origin_message
+        if session_obj not in db_session:
+            session_obj = db_session.merge(session_obj)
+        if message_obj not in db_session:
+            message_obj = db_session.merge(message_obj)
+            
         skill = ESCOSkill(
-            session_id=chat_session.session_id,
-            origin_message_id=origin_message.message_id,
+            session_id=session_obj.session_id,
+            origin_message_id=message_obj.message_id,
             uri=uri,
             title=title,
             reference_language=reference_language,
@@ -151,8 +164,8 @@ def add_esco_skill(
         db_session.add(skill)
         db_session.commit()
         db_session.refresh(skill)
-        db_session.refresh(chat_session)  # Refresh to update esco_skills relationship
-        db_session.refresh(origin_message)  # Refresh to update derived_skills_esco relationship
+        db_session.refresh(session_obj)  # Refresh to update esco_skills relationship
+        db_session.refresh(message_obj)  # Refresh to update derived_skills_esco relationship
         return skill
     
     if session is not None:
