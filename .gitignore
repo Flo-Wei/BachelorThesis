@@ -206,3 +206,38 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Database directories
+database/
+databases/
+db/
+data/
+
+# SQLite specific
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# PostgreSQL
+*.dump
+*.sql
+
+# MySQL
+*.myd
+*.myi
+*.frm
+
+# MongoDB
+*.bson
+
+# Redis
+dump.rdb
+appendonly.aof
