@@ -12,4 +12,6 @@ dependencies = [
     "requests",
     "fastapi",
     "uvicorn[standard]",
+    "sqlalchemy>=2",
+    "sqlmodel"
 ]
