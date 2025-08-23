@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - AI Chatbot System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .api-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        
+        .api-link {
+            display: inline-block;
+            padding: 15px 25px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .api-link:hover {
+            background: #2980b9;
+            color: white;
+        }
+        
+        .api-link.redoc {
+            background: #e74c3c;
+        }
+        
+        .api-link.redoc:hover {
+            background: #c0392b;
+        }
+        
+        .endpoint-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .method.get { background: #28a745; }
+        .method.post { background: #007bff; }
+        .method.put { background: #ffc107; color: #000; }
+        .method.delete { background: #dc3545; }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">AI Chatbot System</a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="documentation.html" class="nav-link active">API Docs</a>
+                </li>
+                <li class="nav-item">
+                    <a href="user.html" class="nav-link">Account</a>
+                </li>
+                <li class="nav-item">
+                    <a href="skills.html" class="nav-link">Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-content">
+            <div class="content-section">
+                <h1>API Documentation</h1>
+                
+                <div class="api-card">
+                    <h2>🚀 Interactive API Documentation</h2>
+                    <p>
+                        The Bachelor Thesis Chatbot API provides comprehensive documentation through FastAPI's 
+                        automatic documentation generation. Choose your preferred documentation interface:
+                    </p>
+                    
+                    <div style="margin: 20px 0;">
+                        <span class="status-indicator" id="apiStatus"></span>
+                        <span id="apiStatusText">Checking API status...</span>
+                    </div>
+                    
+                    <a href="http://localhost:8000/docs" target="_blank" class="api-link">
+                        📖 Swagger UI Documentation
+                    </a>
+                    <a href="http://localhost:8000/redoc" target="_blank" class="api-link redoc">
+                        📋 ReDoc Documentation
+                    </a>
+                </div>
+
+                <div class="api-card">
+                    <h2>📊 API Overview</h2>
+                    <p><strong>API Title:</strong> Bachelor Thesis Chatbot API</p>
+                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Base URL:</strong> <code>http://localhost:8000</code></p>
+                    <p><strong>Description:</strong> API for skill-extraction chatbot with database integration</p>
+                </div>
+
+                <div class="api-card">
+                    <h2>🔗 Key Endpoints Preview</h2>
+                    <p>Here are some of the main API endpoints available:</p>
+                    
+                    <div class="endpoint-preview">
+                        <span class="method post">POST</span><strong>/users/register</strong><br>
+                        <small>Register a new user account</small>
+                    </div>
+                    
+                    <div class="endpoint-preview">
+                        <span class="method post">POST</span><strong>/users/login</strong><br>
+                        <small>Authenticate user credentials</small>
+                    </div>
+                    
+                    <div class="endpoint-preview">
+                        <span class="method get">GET</span><strong>/users/{user_id}</strong><br>
+                        <small>Get user information by ID</small>
+                    </div>
+                    
+                    <div class="endpoint-preview">
+                        <span class="method post">POST</span><strong>/chat/sessions</strong><br>
+                        <small>Create a new chat session</small>
+                    </div>
+                    
+                    <div class="endpoint-preview">
+                        <span class="method get">GET</span><strong>/chat/sessions/{session_id}/messages</strong><br>
+                        <small>Get all messages from a chat session</small>
+                    </div>
+                    
+                    <div class="endpoint-preview">
+                        <span class="method post">POST</span><strong>/chat/message</strong><br>
+                        <small>Send a message to the chatbot</small>
+                    </div>
+                    
+                    <div class="endpoint-preview">
+                        <span class="method get">GET</span><strong>/ws</strong><br>
+                        <small>WebSocket endpoint for real-time messaging</small>
+                    </div>
+                </div>
+
+                <div class="api-card">
+                    <h2>🛠️ Getting Started</h2>
+                    <p>To explore the API documentation:</p>
+                    <ol style="margin-left: 20px;">
+                        <li>Ensure the backend server is running: <code>uv run python app.py</code></li>
+                        <li>Click on one of the documentation links above</li>
+                        <li>Use the interactive interface to test API endpoints</li>
+                        <li>View request/response schemas and examples</li>
+                    </ol>
+                    
+                    <h3>📝 Notes</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>Swagger UI provides an interactive testing interface</li>
+                        <li>ReDoc offers a clean, readable documentation format</li>
+                        <li>Both interfaces show the same API information in different formats</li>
+                        <li>All endpoints include detailed schemas and examples</li>
+                    </ul>
+                </div>
+
+                <div class="api-card">
+                    <h2>🔧 Development Tools</h2>
+                    <p>Additional development resources:</p>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>OpenAPI Schema:</strong> <a href="http://localhost:8000/openapi.json" target="_blank">http://localhost:8000/openapi.json</a></li>
+                        <li><strong>Health Check:</strong> Available through the API endpoints</li>
+                        <li><strong>WebSocket Testing:</strong> Use the Chat Demo page for real-time testing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simple API status check
+        async function checkApiStatus() {
+            const statusIndicator = document.getElementById('apiStatus');
+            const statusText = document.getElementById('apiStatusText');
+            
+            try {
+                const response = await fetch('http://localhost:8000/docs');
+                if (response.ok) {
+                    statusIndicator.className = 'status-indicator status-online';
+                    statusText.textContent = 'API Server Online';
+                } else {
+                    throw new Error('API not responding');
+                }
+            } catch (error) {
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'API Server Offline - Start with: uv run python app.py';
+            }
+        }
+        
+        // Check status when page loads
+        document.addEventListener('DOMContentLoaded', checkApiStatus);
+    </script>
+</body>
+</html>

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills Analysis - AI Chatbot System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chat-layout {
+            display: flex;
+            height: calc(100vh - 120px);
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .chat-sidebar {
+            width: 280px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px 0 0 10px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .skill-system-selector {
+            width: 100%;
+            padding: 12px;
+            background: #34495e;
+            color: white;
+            border: 1px solid #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .skill-system-selector:hover {
+            background: #3498db;
+        }
+        
+        .skill-system-selector:focus {
+            outline: none;
+            background: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+        
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+        
+        .sessions-header {
+            padding: 15px 20px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .session-item {
+            padding: 12px 20px;
+            margin: 2px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border: none;
+            background: none;
+            color: #bdc3c7;
+            text-align: left;
+            width: calc(100% - 20px);
+            font-size: 14px;
+        }
+        
+        .session-item:hover {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+        
+        .session-item.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .session-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .session-skills-count {
+            font-size: 12px;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .skills-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+        
+        .skills-header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .skills-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .skills-meta {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .skills-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            background: #ecf0f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #2c3e50;
+            transition: background 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #bdc3c7;
+        }
+        
+        .skills-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .skill-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .skill-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .skill-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .skill-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1.3;
+        }
+        
+        .skill-system-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        
+        .skill-description {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .skill-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .skill-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .skill-meta-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .skill-uri {
+            color: #3498db;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .skill-uri:hover {
+            text-decoration: underline;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .user-info {
+            padding: 15px 20px;
+            border-top: 1px solid #34495e;
+            background: #1a252f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .filter-section {
+            background: #ecf0f1;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-select {
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            background: white;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .skills-stats {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .stats-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+        }
+        
+        .stats-number {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .chat-layout {
+                height: calc(100vh - 80px);
+                margin: 10px;
+                border-radius: 0;
+            }
+            
+            .chat-sidebar {
+                width: 240px;
+            }
+            
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .skills-content {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .chat-layout {
+                flex-direction: column;
+                height: auto;
+                min-height: calc(100vh - 80px);
+            }
+            
+            .chat-sidebar {
+                width: 100%;
+                height: 200px;
+                border-radius: 0;
+                order: 2;
+            }
+            
+            .skills-main {
+                order: 1;
+                min-height: 60vh;
+            }
+        }
+        
+        .demo-note {
+            background: #e8f4fd;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            padding: 12px;
+            margin: 10px 20px;
+            text-align: center;
+            max-width: 1400px;
+            font-size: 14px;
+        }
+        
+        /* Override body for full-screen layout */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">AI Chatbot System</a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="documentation.html" class="nav-link">API Docs</a>
+                </li>
+                <li class="nav-item">
+                    <a href="user.html" class="nav-link">Account</a>
+                </li>
+                <li class="nav-item">
+                    <a href="skills.html" class="nav-link active">Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Quick Start Note -->
+    <div class="demo-note">
+        <strong>Skills Analysis:</strong> View and analyze extracted skills from chat conversations across different skill systems.
+    </div>
+
+    <!-- Main Skills Layout -->
+    <div class="chat-layout">
+        <!-- Sidebar -->
+        <div class="chat-sidebar">
+            <div class="sidebar-header">
+                <select class="skill-system-selector" id="skillSystemSelector">
+                    <option value="ESCO">ESCO Skills</option>
+                    <option value="Freiwilligenpass">Freiwilligenpass</option>
+                </select>
+            </div>
+            
+            <div class="sessions-header">Chat Sessions</div>
+            
+            <div class="sessions-list" id="sessionsList">
+                <!-- Sample Sessions with skill counts -->
+                <button class="session-item active" data-session-id="1">
+                    <div class="session-title">Welcome Chat</div>
+                    <div class="session-skills-count">3 skills extracted</div>
+                </button>
+                
+                <button class="session-item" data-session-id="2">
+                    <div class="session-title">Python Questions</div>
+                    <div class="session-skills-count">8 skills extracted</div>
+                </button>
+                
+                <button class="session-item" data-session-id="3">
+                    <div class="session-title">Project Planning</div>
+                    <div class="session-skills-count">12 skills extracted</div>
+                </button>
+                
+                <button class="session-item" data-session-id="4">
+                    <div class="session-title">API Documentation</div>
+                    <div class="session-skills-count">5 skills extracted</div>
+                </button>
+                
+                <button class="session-item" data-session-id="5">
+                    <div class="session-title">Data Analysis</div>
+                    <div class="session-skills-count">15 skills extracted</div>
+                </button>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-name" id="userName">Guest User</div>
+            </div>
+        </div>
+        
+        <!-- Main Skills Area -->
+        <div class="skills-main">
+            <div class="skills-header">
+                <div>
+                    <h1 class="skills-title" id="skillsTitle">Welcome Chat - ESCO Skills</h1>
+                    <div class="skills-meta" id="skillsMeta">Session from 2024-01-15</div>
+                </div>
+                <div class="skills-actions">
+                    <button class="action-btn" id="exportSkillsBtn">Export</button>
+                    <button class="action-btn" id="refreshSkillsBtn">Refresh</button>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-group">
+                    <span class="filter-label">Language:</span>
+                    <select class="filter-select" id="languageFilter">
+                        <option value="en">English</option>
+                        <option value="de">German</option>
+                        <option value="fr">French</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Sort by:</span>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="title">Title</option>
+                        <option value="relevance">Relevance</option>
+                        <option value="extracted">Date Extracted</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="skills-stats">
+                <div class="stats-item">
+                    <span>Total Skills:</span>
+                    <span class="stats-number" id="totalSkills">3</span>
+                </div>
+                <div class="stats-item">
+                    <span>Skill System:</span>
+                    <span class="stats-number" id="currentSkillSystem">ESCO</span>
+                </div>
+                <div class="stats-item">
+                    <span>Last Updated:</span>
+                    <span class="stats-number" id="lastUpdated">Just now</span>
+                </div>
+            </div>
+            
+            <div class="skills-content" id="skillsContent">
+                <!-- Skills Grid -->
+                <div class="skills-grid" id="skillsGrid">
+                    <!-- Sample ESCO Skills -->
+                    <div class="skill-card">
+                        <div class="skill-header">
+                            <h3 class="skill-title">Python Programming</h3>
+                            <span class="skill-system-badge">ESCO</span>
+                        </div>
+                        <div class="skill-description">
+                            The ability to write, debug, and maintain Python code for various applications including web development, data analysis, and automation.
+                        </div>
+                        <div class="skill-meta">
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">URI:</span>
+                                <a href="#" class="skill-uri">http://data.europa.eu/esco/skill/python-programming</a>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Language:</span>
+                                <span>English</span>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Extracted from:</span>
+                                <span>Message #5</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-card">
+                        <div class="skill-header">
+                            <h3 class="skill-title">API Development</h3>
+                            <span class="skill-system-badge">ESCO</span>
+                        </div>
+                        <div class="skill-description">
+                            Design and implement Application Programming Interfaces (APIs) for web services and applications, including RESTful APIs and documentation.
+                        </div>
+                        <div class="skill-meta">
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">URI:</span>
+                                <a href="#" class="skill-uri">http://data.europa.eu/esco/skill/api-development</a>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Language:</span>
+                                <span>English</span>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Extracted from:</span>
+                                <span>Message #12</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-card">
+                        <div class="skill-header">
+                            <h3 class="skill-title">Problem Solving</h3>
+                            <span class="skill-system-badge">ESCO</span>
+                        </div>
+                        <div class="skill-description">
+                            Identify problems, analyze information, and develop solutions through logical thinking and creative approaches.
+                        </div>
+                        <div class="skill-meta">
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">URI:</span>
+                                <a href="#" class="skill-uri">http://data.europa.eu/esco/skill/problem-solving</a>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Language:</span>
+                                <span>English</span>
+                            </div>
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Extracted from:</span>
+                                <span>Message #8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State (hidden by default) -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-state-icon">🔍</div>
+                    <h3>No Skills Found</h3>
+                    <p>No skills have been extracted from this chat session yet.</p>
+                    <p>Start a conversation to see extracted skills appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Note: JavaScript functionality will be added in the next phase -->
+    <!-- This is just the HTML/CSS structure as requested -->
+</body>
+</html>

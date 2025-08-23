@@ -3,126 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Chatbot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        .chat-container {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            height: 400px;
-            overflow-y: auto;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .message {
-            margin: 5px 0;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        .user {
-            background: #e3f2fd;
-            text-align: right;
-        }
-        .bot {
-            background: #f5f5f5;
-        }
-        .input-container {
-            display: flex;
-            gap: 10px;
-        }
-        #messageInput {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        #sendButton {
-            padding: 8px 16px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        #sendButton:hover {
-            background: #0056b3;
-        }
-        .status {
-            color: #666;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-    </style>
+    <title>Bachelor Thesis - AI Chatbot System</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Simple Chatbot</h1>
-    <div class="status" id="status">Connecting...</div>
-    
-    <div class="chat-container" id="chatContainer">
-        <div class="message bot">Hello! I'm a simple chatbot. Type a message to test.</div>
-    </div>
-    
-    <div class="input-container">
-        <input type="text" id="messageInput" placeholder="Type your message..." />
-        <button id="sendButton">Send</button>
-    </div>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">AI Chatbot System</a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link active">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="documentation.html" class="nav-link">API Docs</a>
+                </li>
+                <li class="nav-item">
+                    <a href="user.html" class="nav-link">Account</a>
+                </li>
+                <li class="nav-item">
+                    <a href="skills.html" class="nav-link">Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-    <script>
-        const ws = new WebSocket('ws://localhost:8000/ws');
-        const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const status = document.getElementById('status');
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>AI-Powered Chatbot System</h1>
+            <p>A comprehensive Bachelor Thesis project exploring advanced conversational AI with user management, skill-based interactions, and intelligent message handling.</p>
+        </div>
+    </section>
 
-        ws.onopen = function() {
-            status.textContent = 'Connected';
-            status.style.color = 'green';
-        };
-
-        ws.onclose = function() {
-            status.textContent = 'Disconnected';
-            status.style.color = 'red';
-        };
-
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            addMessage(data.content, 'bot');
-        };
-
-        function addMessage(content, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            messageDiv.textContent = content;
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message) {
-                addMessage(message, 'user');
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-content">
+            <div class="content-section">
+                <h2>Project Overview</h2>
+                <p>
+                    This Bachelor Thesis project presents a sophisticated AI chatbot system built with modern web technologies. 
+                    The system integrates advanced language models with a robust backend architecture to provide intelligent, 
+                    context-aware conversations while maintaining user sessions and managing complex skill-based interactions.
+                </p>
                 
-                ws.send(JSON.stringify({
-                    type: 'message',
-                    content: message,
-                    timestamp: new Date().toISOString()
-                }));
-                
-                messageInput.value = '';
-            }
-        }
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>Advanced AI Integration</h3>
+                        <p>Utilizes cutting-edge language models for natural, context-aware conversations with intelligent response generation.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>User Management</h3>
+                        <p>Comprehensive user authentication and session management system with persistent chat histories.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Skill-Based Architecture</h3>
+                        <p>Modular skill system allowing the chatbot to perform specific tasks and provide specialized responses.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Real-time Communication</h3>
+                        <p>WebSocket-based real-time messaging for instant response delivery and seamless user experience.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Secure Backend</h3>
+                        <p>FastAPI-powered backend with robust database integration and secure API endpoints.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Data Management</h3>
+                        <p>Sophisticated database schema for managing users, messages, chat sessions, and skill configurations.</p>
+                    </div>
+                </div>
 
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    </script>
+                <h2>Technical Architecture</h2>
+                <p>
+                    The system is built using a modern tech stack that ensures scalability, maintainability, and performance:
+                </p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li><strong>Backend:</strong> FastAPI with Python for high-performance API development</li>
+                    <li><strong>Database:</strong> SQLModel/SQLite for data persistence and relationship management</li>
+                    <li><strong>AI Integration:</strong> Custom LLM wrapper classes for flexible model integration</li>
+                    <li><strong>Real-time Communication:</strong> WebSocket protocol for instant messaging</li>
+                    <li><strong>Frontend:</strong> Clean HTML/CSS/JavaScript for user interface</li>
+                    <li><strong>Environment Management:</strong> UV package manager for Python dependencies</li>
+                </ul>
+
+                <h2>Research Focus</h2>
+                <p>
+                    This Bachelor Thesis explores several key areas in conversational AI and system architecture:
+                </p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>Integration patterns for large language models in web applications</li>
+                    <li>Skill-based chatbot architectures for specialized task handling</li>
+                    <li>User session management in conversational AI systems</li>
+                    <li>Real-time communication protocols for chat applications</li>
+                    <li>Database design for conversational AI data persistence</li>
+                    <li>Scalable backend patterns for AI-powered applications</li>
+                </ul>
+
+                <div class="text-center mt-20">
+                    <a href="chat.html" class="btn">Try the Chat Demo</a>
+                    <a href="documentation.html" class="btn btn-secondary">View API Documentation</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
