@@ -9,10 +9,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from Backend.database.init import init_database, get_db_session
 from Backend.database.utils import (
-    create_user_with_session,
-    create_chat_session_with_session,
-    add_message_with_session,
-    add_esco_skill_with_session
+    create_user,
+    create_chat_session,
+    add_message,
+    add_esco_skill
 )
 from Backend.database.models.messages import MessageType
 
@@ -30,7 +30,7 @@ def main():
     # Create a user
     print("\n2. Creating a user...")
     try:
-        user = create_user_with_session(
+        user = create_user(
             username="john_doe",
             email="john.doe@example.com"
         )
@@ -49,7 +49,7 @@ def main():
     
     # Create a chat session
     print("\n3. Creating a chat session...")
-    chat_session = create_chat_session_with_session(
+    chat_session = create_chat_session(
         user=user,
         session_name="Skill Assessment Chat"
     )
@@ -59,7 +59,7 @@ def main():
     print("\n4. Adding messages...")
     
     # User message
-    user_message = add_message_with_session(
+    user_message = add_message(
         chat_session=chat_session,
         content="Hi! I have 5 years of experience in Python programming, machine learning, and data analysis.",
         message_type=MessageType.USER
@@ -67,7 +67,7 @@ def main():
     print(f"   ✅ Added user message (ID: {user_message.message_id})")
     
     # Assistant message
-    assistant_message = add_message_with_session(
+    assistant_message = add_message(
         chat_session=chat_session,
         content="That's great! I can identify several valuable skills from your background.",
         message_type=MessageType.ASSISTANT
@@ -78,7 +78,7 @@ def main():
     print("\n5. Adding ESCO skills...")
     
     # Python programming skill
-    python_skill = add_esco_skill_with_session(
+    python_skill = add_esco_skill(
         chat_session=chat_session,
         origin_message=user_message,
         uri="http://data.europa.eu/esco/skill/python-programming",
@@ -90,7 +90,7 @@ def main():
     print(f"   ✅ Added Python skill (ID: {python_skill.id})")
     
     # Machine learning skill
-    ml_skill = add_esco_skill_with_session(
+    ml_skill = add_esco_skill(
         chat_session=chat_session,
         origin_message=user_message,
         uri="http://data.europa.eu/esco/skill/machine-learning",

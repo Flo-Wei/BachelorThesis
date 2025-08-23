@@ -1,7 +1,9 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional, List
-from Backend.database.models.messages import ChatSession
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Backend.database.models.messages import ChatSession
 
 
 class User(SQLModel, table=True):

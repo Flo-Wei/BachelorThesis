@@ -1,10 +1,12 @@
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List, Literal
+from typing import Optional, List, Literal, TYPE_CHECKING
 from datetime import datetime
-from Backend.database.models.users import User
-from Backend.database.models.skills import ESCOSkill
-from openai import OpenAIResponse
+from openai.types.responses.response import Response as OpenAIResponse
+
+if TYPE_CHECKING:
+    from Backend.database.models.users import User
+    from Backend.database.models.skills import ESCOSkill
 
 
 class MessageType(str, Enum):
@@ -22,7 +24,7 @@ class ChatSession(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
     
     # Relationships
-    user: User = Relationship(back_populates="chat_sessions")
+    user: "User" = Relationship(back_populates="chat_sessions")
     chat_messages: List["ChatMessage"] = Relationship(back_populates="chat_session")
     esco_skills: List["ESCOSkill"] = Relationship(back_populates="chat_session")
 
@@ -91,7 +93,7 @@ class ChatMessage(SQLModel, table=True):
     timestamp: datetime = Field(default_factory=datetime.now, index=True)
     
     # Relationships
-    chat_session: ChatSession = Relationship(back_populates="chat_messages")
+    chat_session: "ChatSession" = Relationship(back_populates="chat_messages")
     derived_skills_esco: List["ESCOSkill"] = Relationship(back_populates="origin_message")
 
     # Methods

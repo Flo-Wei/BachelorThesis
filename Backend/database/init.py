@@ -4,7 +4,8 @@ import logging
 from contextlib import contextmanager
 from typing import Generator, Optional
 
-from sqlmodel import Session, SQLModel, create_engine, Engine
+from sqlmodel import Session, SQLModel, create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.pool import StaticPool
 
 from .config import db_config
@@ -81,32 +82,12 @@ class DatabaseManager:
 # Global database manager instance
 db_manager = DatabaseManager()
 
-
-# Convenience functions
-def init_database() -> None:
+# Utility functions
+def init_database():
     """Initialize the database."""
     db_manager.initialize_database()
 
-
-def get_engine() -> Engine:
-    """Get the database engine."""
-    return db_manager.engine
-
-
-def get_session() -> Session:
-    """Get a new database session (caller must close it)."""
-    return db_manager.create_session()
-
-
-@contextmanager
-def get_db_session() -> Generator[Session, None, None]:
-    """Get a database session with automatic cleanup."""
-    with db_manager.get_session() as session:
-        yield session
-
-
-# FastAPI dependency for session injection
-def get_db() -> Generator[Session, None, None]:
-    """FastAPI dependency for database session injection."""
+def get_db_session():
+    """Get a database session."""
     with db_manager.get_session() as session:
         yield session

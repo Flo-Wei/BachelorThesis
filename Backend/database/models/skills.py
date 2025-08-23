@@ -1,8 +1,11 @@
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, Dict, Any
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import JSON
+from typing import Optional, Dict, Any, TYPE_CHECKING
 from datetime import datetime
-from Backend.database.models.messages import ChatMessage, ChatSession
+
+if TYPE_CHECKING:
+    from Backend.database.models.messages import ChatMessage, ChatSession
 
 class SkillSystem(str, Enum):
     ESCO = "ESCO"
@@ -20,9 +23,9 @@ class ESCOSkill(ChatSkillBase, table=True):
     uri: str = Field(max_length=255)
     title: str = Field(max_length=255)
     reference_language: str = Field(max_length=255)
-    preferred_label: Dict[str, str] = Field(sa_column_kwargs={"type": "json"})
-    description: Dict[str, str] = Field(sa_column_kwargs={"type": "json"})
-    links: Dict[str, Any] = Field(sa_column_kwargs={"type": "json"})
+    preferred_label: Dict[str, str] = Field(sa_column=Column(JSON))
+    description: Dict[str, str] = Field(sa_column=Column(JSON))
+    links: Dict[str, Any] = Field(sa_column=Column(JSON))
     
     skill_system: SkillSystem = Field(default=SkillSystem.ESCO, index=True)
     
