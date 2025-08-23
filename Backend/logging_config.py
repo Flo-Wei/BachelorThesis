@@ -43,7 +43,8 @@ def setup_logging():
     # Set up logging with colors
     logger_handler = logging.StreamHandler()
     logger_handler.setFormatter(ColoredFormatter(
-        fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%H:%M:%S'
     ))
 
     # Configure root logger
@@ -53,12 +54,12 @@ def setup_logging():
     root_logger.addHandler(logger_handler)
 
     # Configure specific loggers
-    # Set httpx to WARNING level to reduce noise
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-
     # Reduce noise from these loggers:
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("asyncio").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
 
     # FastAPI logging configuration
     # Main FastAPI logger - set to INFO to see request/response logs
@@ -73,7 +74,7 @@ def setup_logging():
     # Remove uvicorn's default handlers and use your configured format
     for logger in [uvicorn_logger, uvicorn_access_logger, uvicorn_error_logger]:
         logger.handlers.clear()
-        logger.setLevel(logging.WARNING)
+        logger.setLevel(logging.INFO)
         logger.propagate = True  # This makes them use the root logger's handlers
 
     # Optional: Enable more detailed logging for development

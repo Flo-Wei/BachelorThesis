@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal, Dict, List
+from typing import Literal, Dict, List, Optional
 
 
 class BaseSkill(BaseModel):
@@ -25,10 +25,14 @@ class ESCOSkill(BaseSkill):
     def __repr__(self) -> str:
         return self.title
 
-    def get_preferred_label(self, language: str) -> str:
+    def get_preferred_label(self, language: Optional[str] = None) -> str:
+        if language is None:
+            language = self.reference_language
         return self.preferred_label.get(language, self.title)
     
-    def get_description(self, language: str) -> str:
+    def get_description(self, language: Optional[str] = None) -> str:
+        if language is None:
+            language = self.reference_language
         return self.description.get(language, "No description available")
  
 

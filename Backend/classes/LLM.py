@@ -102,9 +102,9 @@ class OpenAILLM(BaseLLM):
         skill: CustomSkill,
         available_skills: List[BaseSkill]
     ) -> ChatSkillBase:
-        
-        mapping_prompt = get_prompt("information_mapper").format(skill=skill, available_skills=available_skills)
-        
+        available_skills_str = "\n".join([f"id: {i} - title: {skill.title} - description: {skill.get_description()}" for i, skill in enumerate(available_skills)])
+        mapping_prompt = get_prompt("information_mapper").format(skill=skill, available_skills=available_skills_str)
+        logging.debug(f"mapping_prompt: {mapping_prompt}")
         response = self.client.responses.create(
             model=self.model_name,
             input=mapping_prompt,
