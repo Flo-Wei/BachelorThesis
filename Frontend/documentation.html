@@ -199,7 +199,7 @@
                     <h2>🔧 Development Tools</h2>
                     <p>Additional development resources:</p>
                     <ul style="margin-left: 20px;">
-                        <li><strong>OpenAPI Schema:</strong> <a href="http://localhost:8000/openapi.json" target="_blank">http://localhost:8000/openapi.json</a></li>
+                        <li><strong>OpenAPI Schema:</strong> <a href="/openapi.json" target="_blank">API Schema</a></li>
                         <li><strong>Health Check:</strong> Available through the API endpoints</li>
                         <li><strong>WebSocket Testing:</strong> Use the Chat Demo page for real-time testing</li>
                     </ul>
@@ -216,7 +216,8 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="js/api.js"></script>
+            <script src="js/config.js"></script>
+        <script src="js/api.js"></script>
     <script>
         // API status check using our API client
         async function checkApiStatus() {

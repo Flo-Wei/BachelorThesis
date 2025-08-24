@@ -5,7 +5,12 @@
 
 class APIClient {
     constructor() {
-        this.baseURL = 'http://localhost:8000';
+        // Use configuration for base URL
+        this.baseURL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : 
+            (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:8000' 
+                : window.location.origin);
+        
         this.token = localStorage.getItem('auth_token');
         this.user = JSON.parse(localStorage.getItem('user_data') || 'null');
     }
