@@ -11,6 +11,15 @@ class APIClient {
                 ? 'http://localhost:8000' 
                 : window.location.origin);
         
+        // Debug logging
+        console.log('APIClient initialized with:', {
+            hostname: window.location.hostname,
+            origin: window.location.origin,
+            baseURL: this.baseURL,
+            configExists: typeof CONFIG !== 'undefined',
+            configURL: typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : 'undefined'
+        });
+        
         this.token = localStorage.getItem('auth_token');
         this.user = JSON.parse(localStorage.getItem('user_data') || 'null');
     }
@@ -67,13 +76,32 @@ class APIClient {
             }
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-                throw new Error(errorData.detail || `HTTP ${response.status}`);
+                let errorMessage = `HTTP ${response.status}`;
+                
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                } catch (parseError) {
+                    // If we can't parse JSON, try to get text content
+                    try {
+                        const errorText = await response.text();
+                        if (errorText) {
+                            errorMessage = errorText;
+                        }
+                    } catch (textError) {
+                        // If all else fails, use status text
+                        errorMessage = response.statusText || errorMessage;
+                    }
+                }
+                
+                throw new Error(errorMessage);
             }
 
             return await response.json();
         } catch (error) {
             console.error(`API Error (${endpoint}):`, error);
+            console.error(`Request URL: ${url}`);
+            console.error(`Request config:`, config);
             throw error;
         }
     }
