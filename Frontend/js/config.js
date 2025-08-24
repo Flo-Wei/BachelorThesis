@@ -1,26 +1,28 @@
 /**
- * Configuration file for the AI Chatbot System
+ * Configuration file for AI Chatbot System
  * Update these values for different environments
+ * Version: 1.0.0
  */
 
 const CONFIG = {
+    // Version for cache busting
+    VERSION: '1.0.0',
+    
     // API Configuration
     API_BASE_URL: (() => {
         const hostname = window.location.hostname;
         const port = window.location.port;
         
+        console.log('Config: Determining API_BASE_URL for hostname:', hostname);
+        
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development environment
+            console.log('Config: Using localhost development URL');
             return 'http://localhost:8000';
         } else if (hostname === '10.1.70.4' || hostname.startsWith('10.1.')) {
-            // Local network - use port 8000
+            console.log('Config: Using local network URL');
             return `http://${hostname}:8000`;
         } else {
-            // Production environment - same domain (works with reverse proxy)
-            // Option 1: No prefix (current setup)
-            // return window.location.origin;
-            
-            // Option 2: With /api prefix (enabled)
+            console.log('Config: Using production URL with /api prefix');
             return window.location.origin + '/api';
         }
     })(),
@@ -35,6 +37,10 @@ const CONFIG = {
     // Session Configuration
     SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes in milliseconds
 };
+
+// Debug logging
+console.log('Config loaded:', CONFIG);
+console.log('Config.API_BASE_URL:', CONFIG.API_BASE_URL);
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
