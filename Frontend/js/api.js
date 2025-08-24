@@ -7,9 +7,17 @@ class APIClient {
     constructor() {
         // Use configuration for base URL
         this.baseURL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : 
-            (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'http://localhost:8000' 
-                : window.location.origin);
+            (() => {
+                const hostname = window.location.hostname;
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    return 'http://localhost:8000';
+                } else if (hostname === '10.1.70.4' || hostname.startsWith('10.1.')) {
+                    // Local network - use port 8000
+                    return `http://${hostname}:8000`;
+                } else {
+                    return window.location.origin;
+                }
+            })();
         
         // Debug logging
         console.log('APIClient initialized with:', {
