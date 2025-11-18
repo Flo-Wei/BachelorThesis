@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
+from pathlib import Path
 
 from Backend.logging_config import setup_logging
 from Backend.database.init import init_database
@@ -86,3 +88,10 @@ app.include_router(sessions.router)
 app.include_router(chat.router)
 app.include_router(skills.router)
 app.include_router(utils.router)
+
+# Mount static files directory to serve CSS, JS, HTML, and other static assets
+# This must be mounted after routers so route handlers take precedence
+# With html=True, StaticFiles will automatically serve index.html for "/"
+frontend_path = Path("Frontend")
+if frontend_path.exists():
+    app.mount("/", StaticFiles(directory="Frontend", html=True), name="static")
