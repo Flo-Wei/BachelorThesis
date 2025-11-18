@@ -3,14 +3,21 @@ from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import JSON
 from typing import Optional, Dict, Any, TYPE_CHECKING
 from datetime import datetime
-from Backend.classes.Skill_Classes import ESCOSkill, BaseSkill
+from Backend.classes.Skill_Classes import ESCOSkill, BaseSkill, CustomSkill
 
 if TYPE_CHECKING:
     from Backend.database.models.messages import ChatMessage, ChatSession
 
 class SkillSystem(str, Enum):
+    CUSTOM = "CUSTOM"
     ESCO = "ESCO"
     # FREIWILLIGENPASS = "Freiwilligenpass"
+
+class SkillType(str, Enum):
+    TECHNICAL = "technical"
+    SOFT = "soft"
+    DOMAIN_SPECIFIC = "domain-specific"
+    OTHER = "other"
 
 class ChatSkillBase(SQLModel):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -22,8 +29,53 @@ class ChatSkillBase(SQLModel):
     def from_pydantic(cls, skill: BaseSkill) -> "ChatSkillBase":
         pass
 
-class ESCOSkillModel(ChatSkillBase, table=True):
+class CustomSkillModel(SQLModel, table=True):
+    __tablename__ = "custom_skill"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="chat_session.session_id", index=True)
+    origin_message_id: int = Field(foreign_key="chat_message.message_id", index=True)
+    name: str = Field(max_length=255)
+    type: SkillType = Field(index=True)
+    confidence: float = Field(ge=0, le=1)
+    evidence: str
+    created_at: datetime = Field(default_factory=datetime.now)
+    
+    # Relationships
+    chat_session: "ChatSession" = Relationship(back_populates="custom_skills")
+    origin_message: "ChatMessage" = Relationship(back_populates="derived_skills_custom")
+    esco_skill: Optional["ESCOSkillModel"] = Relationship(
+        back_populates="custom_skill",
+        sa_relationship_kwargs={"uselist": False}
+    )
+    
+    # Methods
+    def __repr__(self) -> str:
+        return self.name
+    
+    def __str__(self) -> str:
+        return self.name
+    
+    @classmethod
+    def from_pydantic(cls, skill: CustomSkill, session_id: int, origin_message_id: int) -> "CustomSkillModel":
+        # Convert string type to SkillType enum
+        skill_type = SkillType(skill.type)
+        return cls(
+            session_id=session_id,
+            origin_message_id=origin_message_id,
+            name=skill.name,
+            type=skill_type,
+            confidence=skill.confidence,
+            evidence=skill.evidence
+        )
+
+class ESCOSkillModel(SQLModel, table=True):
     __tablename__ = "esco_skill"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="chat_session.session_id", index=True)
+    custom_skill_id: int = Field(foreign_key="custom_skill.id", unique=True, index=True)
+    skill_system: SkillSystem = Field(default=SkillSystem.ESCO, index=True)
     
     uri: str = Field(max_length=255)
     title: str = Field(max_length=255)
@@ -33,11 +85,12 @@ class ESCOSkillModel(ChatSkillBase, table=True):
     links: Dict[str, Any] = Field(sa_column=Column(JSON))
     evidence: Optional[str] = Field(default=None)
     
-    skill_system: SkillSystem = Field(default=SkillSystem.ESCO, index=True)
-    
     # Relationships
     chat_session: "ChatSession" = Relationship(back_populates="esco_skills")
-    origin_message: "ChatMessage" = Relationship(back_populates="derived_skills_esco")
+    custom_skill: "CustomSkillModel" = Relationship(
+        back_populates="esco_skill",
+        sa_relationship_kwargs={"uselist": False}
+    )
     
     # Methods
     def __repr__(self) -> str:
@@ -55,8 +108,10 @@ class ESCOSkillModel(ChatSkillBase, table=True):
         return self.description.get(language, "No description available")
     
     @classmethod
-    def from_pydantic(cls, skill: ESCOSkill, evidence: Optional[str] = None) -> "ESCOSkillModel":
+    def from_pydantic(cls, skill: ESCOSkill, custom_skill_id: Optional[int] = None, session_id: Optional[int] = None, evidence: Optional[str] = None) -> "ESCOSkillModel":
         return cls(
+            session_id=session_id or 0,  # Will be set later if None
+            custom_skill_id=custom_skill_id or 0,  # Will be set later if None
             uri=skill.uri,
             title=skill.title,
             reference_language=skill.reference_language,

@@ -441,6 +441,7 @@
         <div class="chat-sidebar">
             <div class="sidebar-header">
                 <select class="skill-system-selector" id="skillSystemSelector">
+                    <option value="CUSTOM">Custom Skills</option>
                     <option value="ESCO">ESCO Skills</option>
                     <option value="Freiwilligenpass">Freiwilligenpass</option>
                 </select>
@@ -682,11 +683,17 @@
         async function loadSkillSystems() {
             try {
                 const systems = await api.getSkillSystems();
-                skillSystemSelector.innerHTML = systems.map(system => 
+                // Sort to put CUSTOM first
+                const sortedSystems = systems.sort((a, b) => {
+                    if (a === 'CUSTOM') return -1;
+                    if (b === 'CUSTOM') return 1;
+                    return a.localeCompare(b);
+                });
+                skillSystemSelector.innerHTML = sortedSystems.map(system => 
                     `<option value="${system}">${system} Skills</option>`
                 ).join('');
                 
-                currentSkillSystem = systems[0] || 'ESCO';
+                currentSkillSystem = sortedSystems[0] || 'CUSTOM';
                 currentSkillSystemSpan.textContent = currentSkillSystem;
                 
             } catch (error) {
@@ -728,7 +735,9 @@
 
         function renderSessionsList() {
             const sessionsHTML = userSessions.map(session => {
-                const skillsCount = session.esco_skills ? session.esco_skills.length : 0;
+                const escoCount = session.esco_skills ? session.esco_skills.length : 0;
+                const customCount = session.custom_skills ? session.custom_skills.length : 0;
+                const totalCount = escoCount + customCount;
                 const isActive = session.session_id === currentSessionId;
                 
                 return `
@@ -736,7 +745,7 @@
                             data-session-id="${session.session_id}"
                             onclick="selectSession(${session.session_id})">
                         <div class="session-title">${session.session_name || 'Untitled Session'}</div>
-                        <div class="session-skills-count">${skillsCount} skills extracted</div>
+                        <div class="session-skills-count">${totalCount} skills extracted</div>
                     </button>
                 `;
             }).join('');
@@ -796,7 +805,9 @@
             filteredSkills.sort((a, b) => {
                 switch (sortBy) {
                     case 'title':
-                        return a.title.localeCompare(b.title);
+                        const aTitle = a.title || a.name || '';
+                        const bTitle = b.title || b.name || '';
+                        return aTitle.localeCompare(bTitle);
                     case 'relevance':
                         return b.id - a.id; // Reverse ID order as proxy for relevance
                     case 'extracted':
@@ -807,40 +818,81 @@
             });
 
             const skillsHTML = filteredSkills.map(skill => {
-                const description = getLocalizedText(skill.description, currentLanguage);
-                const title = getLocalizedText(skill.preferred_label, currentLanguage) || skill.title;
+                // Check if this is a CustomSkill or ESCOSkill
+                const isCustom = skill.skill_system === 'CUSTOM' || !skill.uri;
                 
-                return `
-                    <div class="skill-card">
-                        <div class="skill-header">
-                            <h3 class="skill-title">${title}</h3>
-                            <span class="skill-system-badge">${skill.skill_system}</span>
+                if (isCustom) {
+                    // Render CustomSkill
+                    const typeLabels = {
+                        'technical': 'Technical',
+                        'soft': 'Soft Skill',
+                        'domain-specific': 'Domain-Specific',
+                        'other': 'Other'
+                    };
+                    const typeLabel = typeLabels[skill.type] || skill.type;
+                    
+                    return `
+                        <div class="skill-card">
+                            <div class="skill-header">
+                                <h3 class="skill-title">${skill.name}</h3>
+                                <span class="skill-system-badge">CUSTOM</span>
+                            </div>
+                            <div class="skill-description">
+                                ${skill.evidence || 'No description available'}
+                            </div>
+                            <div class="skill-meta">
+                                <div class="skill-meta-item">
+                                    <span class="skill-meta-label">Type:</span>
+                                    <span>${typeLabel}</span>
+                                </div>
+                                <div class="skill-meta-item">
+                                    <span class="skill-meta-label">Confidence:</span>
+                                    <span>${(skill.confidence * 100).toFixed(1)}%</span>
+                                </div>
+                                <div class="skill-meta-item">
+                                    <span class="skill-meta-label">Extracted from:</span>
+                                    <span>Message #${skill.origin_message_id}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="skill-description">
-                            ${description || 'No description available'}
+                    `;
+                } else {
+                    // Render ESCOSkill
+                    const description = getLocalizedText(skill.description, currentLanguage);
+                    const title = getLocalizedText(skill.preferred_label, currentLanguage) || skill.title;
+                    
+                    return `
+                        <div class="skill-card">
+                            <div class="skill-header">
+                                <h3 class="skill-title">${title}</h3>
+                                <span class="skill-system-badge">${skill.skill_system}</span>
+                            </div>
+                            <div class="skill-description">
+                                ${description || 'No description available'}
+                            </div>
+                            <div class="skill-meta">
+                                <div class="skill-meta-item">
+                                    <span class="skill-meta-label">URI:</span>
+                                    <a href="${skill.uri}" target="_blank" class="skill-uri">${skill.uri}</a>
+                                </div>
+                                <div class="skill-meta-item">
+                                    <span class="skill-meta-label">Language:</span>
+                                    <span>${skill.reference_language}</span>
+                                </div>
+                                <div class="skill-meta-item">
+                                    <span class="skill-meta-label">Mapped from:</span>
+                                    <span>Custom Skill #${skill.custom_skill_id || 'N/A'}</span>
+                                </div>
+                                ${skill.evidence ? `
+                                <div class="skill-meta-item">
+                                    <span class="skill-meta-label">Evidence:</span>
+                                    <span>${skill.evidence}</span>
+                                </div>
+                                ` : ''}
+                            </div>
                         </div>
-                        <div class="skill-meta">
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">URI:</span>
-                                <a href="${skill.uri}" target="_blank" class="skill-uri">${skill.uri}</a>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Language:</span>
-                                <span>${skill.reference_language}</span>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Extracted from:</span>
-                                <span>Message #${skill.origin_message_id}</span>
-                            </div>
-                            ${skill.evidence ? `
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Evidence:</span>
-                                <span>${skill.evidence}</span>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
             }).join('');
 
             skillsGrid.innerHTML = skillsHTML;

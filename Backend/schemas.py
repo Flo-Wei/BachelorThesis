@@ -90,7 +90,8 @@ class SkillResponse(BaseModel):
     preferred_label: Dict[str, str]
     description: Dict[str, str]
     links: Dict[str, Any]
-    origin_message_id: int
+    origin_message_id: Optional[int] = None  # Can be None for ESCO skills (get from custom_skill)
+    custom_skill_id: Optional[int] = None  # ID of the CustomSkill this ESCO skill is mapped from
     session_id: int
     evidence: Optional[str] = None
     
@@ -98,8 +99,24 @@ class SkillResponse(BaseModel):
         from_attributes = True
 
 
+class CustomSkillResponse(BaseModel):
+    id: int
+    skill_system: SkillSystem
+    session_id: int
+    origin_message_id: int
+    name: str
+    type: str  # Converted from enum to string in router
+    confidence: float
+    evidence: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
 class ChatSessionWithSkillsResponse(ChatSessionResponse):
     esco_skills: List[SkillResponse] = []
+    custom_skills: List[CustomSkillResponse] = []
     
     class Config:
         from_attributes = True

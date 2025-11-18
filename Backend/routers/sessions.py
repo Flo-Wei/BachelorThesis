@@ -1,16 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+from sqlalchemy.orm import joinedload
 from typing import List, Dict
 import logging
 
 from Backend.database.init import get_db_session_dependency
 from Backend.database.models.users import User
 from Backend.database.models.messages import ChatSession, ChatMessage
-from Backend.database.models.skills import ESCOSkillModel, SkillSystem
+from Backend.database.models.skills import ESCOSkillModel, CustomSkillModel, SkillSystem
 from Backend.database.utils import create_chat_session
 from Backend.schemas import (
     ChatSessionCreate, ChatSessionResponse, ChatSessionWithSkillsResponse,
-    MessageResponse, SkillResponse
+    MessageResponse, SkillResponse, CustomSkillResponse
 )
 from Backend.auth import get_current_user
 
@@ -58,12 +59,58 @@ async def get_user_sessions(user_id: int, current_user: User = Depends(get_curre
         select(ChatSession).where(ChatSession.user_id == user_id)
     ).all()
     
-    # For each session, get skills count (for now just ESCO)
+    # For each session, get skills count (ESCO and CUSTOM)
     sessions_with_skills = []
     for session in sessions:
-        esco_skills = db.exec(
-            select(ESCOSkillModel).where(ESCOSkillModel.session_id == session.session_id)
+        from sqlalchemy.orm import selectinload
+        stmt = select(ESCOSkillModel).where(ESCOSkillModel.session_id == session.session_id).options(selectinload(ESCOSkillModel.custom_skill))
+        esco_skills = db.exec(stmt).all()
+        # Note: origin_message_id is now accessed through custom_skill relationship
+        # We don't set it on the model since it's not a field anymore
+        
+        custom_skills = db.exec(
+            select(CustomSkillModel).where(CustomSkillModel.session_id == session.session_id)
         ).all()
+        
+        # Convert ESCO skills to SkillResponse format
+        from Backend.schemas import SkillResponse, CustomSkillResponse
+        esco_skill_responses = []
+        for skill in esco_skills:
+            origin_message_id = skill.custom_skill.origin_message_id if skill.custom_skill else None
+            custom_skill_id = skill.custom_skill_id if skill.custom_skill_id else None
+            skill_response = SkillResponse(
+                id=skill.id,
+                skill_system=skill.skill_system,
+                uri=skill.uri,
+                title=skill.title,
+                reference_language=skill.reference_language,
+                preferred_label=skill.preferred_label,
+                description=skill.description,
+                links=skill.links,
+                origin_message_id=origin_message_id,
+                custom_skill_id=custom_skill_id,
+                session_id=skill.session_id,
+                evidence=skill.evidence
+            )
+            esco_skill_responses.append(skill_response)
+        
+        # Convert CustomSkills to CustomSkillResponse format
+        custom_skill_responses = []
+        for custom_skill in custom_skills:
+            # Convert enum to string for JSON serialization
+            skill_type = custom_skill.type.value if hasattr(custom_skill.type, 'value') else str(custom_skill.type)
+            custom_skill_response = CustomSkillResponse(
+                id=custom_skill.id,
+                skill_system=SkillSystem.CUSTOM,
+                session_id=custom_skill.session_id,
+                origin_message_id=custom_skill.origin_message_id,
+                name=custom_skill.name,
+                type=skill_type,
+                confidence=custom_skill.confidence,
+                evidence=custom_skill.evidence,
+                created_at=custom_skill.created_at
+            )
+            custom_skill_responses.append(custom_skill_response)
         
         session_data = ChatSessionWithSkillsResponse(
             session_id=session.session_id,
@@ -71,7 +118,8 @@ async def get_user_sessions(user_id: int, current_user: User = Depends(get_curre
             session_name=session.session_name,
             created_at=session.created_at,
             updated_at=session.updated_at,
-            esco_skills=esco_skills
+            esco_skills=esco_skill_responses,
+            custom_skills=custom_skill_responses
         )
         sessions_with_skills.append(session_data)
     
@@ -155,7 +203,7 @@ async def get_session_messages(session_id: int, current_user: User = Depends(get
     return messages
 
 
-@router.get("/sessions/{session_id}/skills/{skill_system}", response_model=List[SkillResponse])
+@router.get("/sessions/{session_id}/skills/{skill_system}")
 async def get_session_skills(
     session_id: int, 
     skill_system: SkillSystem,
@@ -177,19 +225,63 @@ async def get_session_skills(
             detail="Access denied to this chat session"
         )
     
-    # For now, only ESCO skills are implemented
     if skill_system == SkillSystem.ESCO:
+        # Query with relationship loading
+        from sqlalchemy.orm import selectinload
+        stmt = select(ESCOSkillModel).where(ESCOSkillModel.session_id == session_id).options(selectinload(ESCOSkillModel.custom_skill))
+        skills = db.exec(stmt).all()
+        # Convert to SkillResponse with origin_message_id from custom_skill
+        from Backend.schemas import SkillResponse
+        skill_responses = []
+        for skill in skills:
+            origin_message_id = skill.custom_skill.origin_message_id if skill.custom_skill else None
+            custom_skill_id = skill.custom_skill_id if skill.custom_skill_id else None
+            skill_response = SkillResponse(
+                id=skill.id,
+                skill_system=skill.skill_system,
+                uri=skill.uri,
+                title=skill.title,
+                reference_language=skill.reference_language,
+                preferred_label=skill.preferred_label,
+                description=skill.description,
+                links=skill.links,
+                origin_message_id=origin_message_id,
+                custom_skill_id=custom_skill_id,
+                session_id=skill.session_id,
+                evidence=skill.evidence
+            )
+            skill_responses.append(skill_response)
+        return skill_responses
+    elif skill_system == SkillSystem.CUSTOM:
         skills = db.exec(
-            select(ESCOSkillModel)
-            .where(ESCOSkillModel.session_id == session_id)
+            select(CustomSkillModel)
+            .where(CustomSkillModel.session_id == session_id)
         ).all()
-        return skills
+        # Convert to CustomSkillResponse format
+        from Backend.schemas import CustomSkillResponse
+        skill_responses = []
+        for skill in skills:
+            # Convert enum to string for JSON serialization
+            skill_type = skill.type.value if hasattr(skill.type, 'value') else str(skill.type)
+            skill_response = CustomSkillResponse(
+                id=skill.id,
+                skill_system=SkillSystem.CUSTOM,
+                session_id=skill.session_id,
+                origin_message_id=skill.origin_message_id,
+                name=skill.name,
+                type=skill_type,
+                confidence=skill.confidence,
+                evidence=skill.evidence,
+                created_at=skill.created_at
+            )
+            skill_responses.append(skill_response)
+        return skill_responses
     else:
         # Future skill systems can be added here
         return []
 
 
-@router.get("/sessions/{session_id}/skills", response_model=Dict[str, List[SkillResponse]])
+@router.get("/sessions/{session_id}/skills")
 async def get_all_session_skills(
     session_id: int,
     current_user: User = Depends(get_current_user),
@@ -213,11 +305,56 @@ async def get_all_session_skills(
     result = {}
     
     # Get ESCO skills
-    esco_skills = db.exec(
-        select(ESCOSkillModel)
-        .where(ESCOSkillModel.session_id == session_id)
+    from sqlalchemy.orm import selectinload
+    from Backend.schemas import SkillResponse
+    stmt = select(ESCOSkillModel).where(ESCOSkillModel.session_id == session_id).options(selectinload(ESCOSkillModel.custom_skill))
+    esco_skills = db.exec(stmt).all()
+    # Convert to SkillResponse with origin_message_id from custom_skill
+    skill_responses = []
+    for skill in esco_skills:
+        origin_message_id = skill.custom_skill.origin_message_id if skill.custom_skill else None
+        custom_skill_id = skill.custom_skill_id if skill.custom_skill_id else None
+        skill_response = SkillResponse(
+            id=skill.id,
+            skill_system=skill.skill_system,
+            uri=skill.uri,
+            title=skill.title,
+            reference_language=skill.reference_language,
+            preferred_label=skill.preferred_label,
+            description=skill.description,
+            links=skill.links,
+            origin_message_id=origin_message_id,
+            custom_skill_id=custom_skill_id,
+            session_id=skill.session_id,
+            evidence=skill.evidence
+        )
+        skill_responses.append(skill_response)
+    result["ESCO"] = skill_responses
+    
+    # Get CUSTOM skills
+    from Backend.schemas import CustomSkillResponse
+    custom_skills = db.exec(
+        select(CustomSkillModel)
+        .where(CustomSkillModel.session_id == session_id)
     ).all()
-    result["ESCO"] = esco_skills
+    # Convert to CustomSkillResponse format
+    custom_skill_responses = []
+    for skill in custom_skills:
+        # Convert enum to string for JSON serialization
+        skill_type = skill.type.value if hasattr(skill.type, 'value') else str(skill.type)
+        skill_response = CustomSkillResponse(
+            id=skill.id,
+            skill_system=SkillSystem.CUSTOM,
+            session_id=skill.session_id,
+            origin_message_id=skill.origin_message_id,
+            name=skill.name,
+            type=skill_type,
+            confidence=skill.confidence,
+            evidence=skill.evidence,
+            created_at=skill.created_at
+        )
+        custom_skill_responses.append(skill_response)
+    result["CUSTOM"] = custom_skill_responses
     
     # Future skill systems can be added here
     result["Freiwilligenpass"] = []

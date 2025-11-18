@@ -6,7 +6,7 @@ from openai.types.responses.response import Response as OpenAIResponse
 
 if TYPE_CHECKING:
     from Backend.database.models.users import User
-    from Backend.database.models.skills import ESCOSkillModel
+    from Backend.database.models.skills import ESCOSkillModel, CustomSkillModel
 
 
 class MessageType(str, Enum):
@@ -27,6 +27,7 @@ class ChatSession(SQLModel, table=True):
     user: "User" = Relationship(back_populates="chat_sessions")
     chat_messages: List["ChatMessage"] = Relationship(back_populates="chat_session")
     esco_skills: List["ESCOSkillModel"] = Relationship(back_populates="chat_session")
+    custom_skills: List["CustomSkillModel"] = Relationship(back_populates="chat_session")
 
     # Methods
     def __str__(self):
@@ -89,7 +90,8 @@ class ChatMessage(SQLModel, table=True):
     
     # Relationships
     chat_session: "ChatSession" = Relationship(back_populates="chat_messages")
-    derived_skills_esco: List["ESCOSkillModel"] = Relationship(back_populates="origin_message")
+    # Note: ESCO skills are now linked through CustomSkills, so we only track CustomSkills directly
+    derived_skills_custom: List["CustomSkillModel"] = Relationship(back_populates="origin_message")
 
     # Methods
     def __str__(self):

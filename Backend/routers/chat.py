@@ -5,6 +5,7 @@ import logging
 from Backend.database.init import get_db_session_dependency
 from Backend.database.models.users import User
 from Backend.database.models.messages import ChatSession, MessageType
+from Backend.database.models.skills import CustomSkillModel
 from Backend.database.utils import create_chat_session, add_message
 from Backend.schemas import ChatRequest, ChatResponse
 from Backend.auth import get_current_user
@@ -117,13 +118,29 @@ async def chat_with_user(
         )
         logger.debug(f"Extracted {len(skills)} skills: {[skill.model_dump() for skill in skills]}")
 
+        # Save CustomSkills to database first (before mapping)
+        logger.debug(f"Saving {len(skills)} CustomSkills to database")
+        saved_custom_skills = []
+        for i, skill in enumerate(skills):
+            logger.debug(f"Saving CustomSkill {i+1}/{len(skills)}: '{skill.name}'")
+            custom_skill_model = CustomSkillModel.from_pydantic(
+                skill=skill,
+                session_id=session.session_id,
+                origin_message_id=user_message.message_id
+            )
+            db.add(custom_skill_model)
+            db.commit()
+            db.refresh(custom_skill_model)
+            saved_custom_skills.append(custom_skill_model)
+            logger.debug(f"Saved CustomSkill to database with ID: {custom_skill_model.id}")
+
         # Map skills to available skills
-        logger.debug(f"Starting skill mapping process for {len(skills)} skills")
+        logger.debug(f"Starting skill mapping process for {len(saved_custom_skills)} CustomSkills")
         esco_database_handler = get_esco_database_handler()
         mapped_skills_count = 0
         
-        for i, skill in enumerate(skills):
-            logger.debug(f"Processing skill {i+1}/{len(skills)}: '{skill.name}'")
+        for i, (custom_skill_model, skill) in enumerate(zip(saved_custom_skills, skills)):
+            logger.debug(f"Processing CustomSkill {i+1}/{len(saved_custom_skills)}: '{skill.name}'")
             
             # Search for available skills
             available_skills = esco_database_handler.search_skills(skill.name, limit=20)
@@ -137,26 +154,26 @@ async def chat_with_user(
                 )
                 logger.debug(f"Mapped '{skill.name}' to '{mapped_skill.title}' (URI: {mapped_skill.uri})")
 
-                # Save mapped skill to database
+                # Update mapped skill with custom_skill_id and session_id
+                mapped_skill.custom_skill_id = custom_skill_model.id
                 mapped_skill.session_id = session.session_id
-                mapped_skill.origin_message_id = user_message.message_id
+                
+                # Save mapped skill to database
                 db.add(mapped_skill)
                 db.commit()
                 db.refresh(mapped_skill)
-                logger.debug(f"Saved mapped skill to database with ID: {mapped_skill.id}")
+                logger.debug(f"Saved mapped ESCO skill to database with ID: {mapped_skill.id}, linked to CustomSkill ID: {custom_skill_model.id}")
                 # Add to session
                 session.esco_skills.append(mapped_skill)
+                mapped_skills_count += 1
             else:
-                logger.debug(f"No available skills found for '{skill.name}'")
-                mapped_skill = None
+                logger.debug(f"No available skills found for '{skill.name}', CustomSkill saved but not mapped")
             
             db.add(session)
             db.commit()
             db.refresh(session)
-            mapped_skills_count += 1
-            logger.debug(f"Added mapped skill to session. Total skills in session: {len(session.esco_skills)}")
 
-        logger.debug(f"Skill mapping completed. Mapped {mapped_skills_count} skills for session {session.session_id}")
+        logger.debug(f"Skill mapping completed. Mapped {mapped_skills_count}/{len(saved_custom_skills)} CustomSkills to ESCO skills for session {session.session_id}")
         
         response = ChatResponse(
             message=user_message,
