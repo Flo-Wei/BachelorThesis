@@ -109,11 +109,11 @@ async def chat_with_user(
                     f"content_length={len(assistant_message.message_content)}, "
                     f"preview='{assistant_message.message_content[:100]}{'...' if len(assistant_message.message_content) > 100 else ''}'")
 
-        # Extract skills from assistant message
-        logger.debug(f"Extracting skills from assistant message {assistant_message.message_id}")
+        # Extract skills from user message (where the candidate describes their skills)
+        logger.debug(f"Extracting skills from user message {user_message.message_id}")
         skills = llm.extract_skills(
             instruction=get_prompt("information_extractor"),
-            message=assistant_message
+            message=user_message
         )
         logger.debug(f"Extracted {len(skills)} skills: {[skill.model_dump() for skill in skills]}")
 
@@ -139,7 +139,7 @@ async def chat_with_user(
 
                 # Save mapped skill to database
                 mapped_skill.session_id = session.session_id
-                mapped_skill.origin_message_id = assistant_message.message_id
+                mapped_skill.origin_message_id = user_message.message_id
                 db.add(mapped_skill)
                 db.commit()
                 db.refresh(mapped_skill)
