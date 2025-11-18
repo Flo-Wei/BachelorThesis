@@ -83,11 +83,12 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # Include routers
-app.include_router(users.router)
-app.include_router(sessions.router)
-app.include_router(chat.router)
-app.include_router(skills.router)
-app.include_router(utils.router)
+# API routes are prefixed with /api to match frontend expectations
+app.include_router(users.router, prefix="/api")
+app.include_router(sessions.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
+app.include_router(skills.router, prefix="/api")
+app.include_router(utils.router, prefix="/api")
 
 # Mount static files directory to serve CSS, JS, HTML, and other static assets
 # This must be mounted after routers so route handlers take precedence
