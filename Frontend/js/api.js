@@ -38,6 +38,8 @@ class APIClient {
         this.user = user;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('user_data', JSON.stringify(user));
+        // Update admin link visibility when auth changes
+        this.updateAdminLinkVisibility();
     }
 
     // Clear authentication
@@ -46,6 +48,20 @@ class APIClient {
         this.user = null;
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_data');
+        // Update admin link visibility when auth changes
+        this.updateAdminLinkVisibility();
+    }
+    
+    // Update admin link visibility across all pages
+    updateAdminLinkVisibility() {
+        const adminNavItem = document.getElementById('adminNavItem');
+        if (adminNavItem) {
+            if (this.isAdmin()) {
+                adminNavItem.style.display = 'block';
+            } else {
+                adminNavItem.style.display = 'none';
+            }
+        }
     }
 
     // Check if user is authenticated
@@ -105,7 +121,23 @@ class APIClient {
                 throw new Error(errorMessage);
             }
 
-            return await response.json();
+            // Handle 204 No Content and other empty responses
+            if (response.status === 204) {
+                return null;
+            }
+
+            // Check if response has content before parsing JSON
+            const text = await response.text();
+            if (!text || text.trim() === '') {
+                return null;
+            }
+
+            try {
+                return JSON.parse(text);
+            } catch (parseError) {
+                // If it's not valid JSON, return the text
+                return text;
+            }
         } catch (error) {
             console.error(`API Error (${endpoint}):`, error);
             console.error(`Request URL: ${url}`);
@@ -116,10 +148,10 @@ class APIClient {
 
     // ===== USER MANAGEMENT =====
 
-    async registerUser(username, email) {
+    async registerUser(username, email, isAdmin = false) {
         return await this.request('/users/register', {
             method: 'POST',
-            body: JSON.stringify({ username, email })
+            body: JSON.stringify({ username, email, is_admin: isAdmin })
         });
     }
 
@@ -136,6 +168,30 @@ class APIClient {
 
     async getUser(userId) {
         return await this.request(`/users/${userId}`);
+    }
+
+    // ===== ADMIN METHODS =====
+
+    async listAllUsers() {
+        return await this.request('/api/users');
+    }
+
+    async updateUser(userId, userData) {
+        return await this.request(`/api/users/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(userData)
+        });
+    }
+
+    async deleteUser(userId) {
+        return await this.request(`/api/users/${userId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    isAdmin() {
+        const user = this.getCurrentUser();
+        return user && user.is_admin === true;
     }
 
     // ===== CHAT SESSIONS =====

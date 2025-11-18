@@ -422,6 +422,9 @@
                 <li class="nav-item">
                     <a href="chat.html" class="nav-link active">Chat Demo</a>
                 </li>
+                <li class="nav-item" id="adminNavItem" style="display: none;">
+                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -532,5 +535,11 @@
     <script src="js/config.js?v=1.0.0"></script>
     <script src="js/api.js?v=1.0.0"></script>
     <script src="js/chat.js"></script>
+    <script>
+        // Update admin link visibility on page load
+        if (typeof api !== 'undefined') {
+            api.updateAdminLinkVisibility();
+        }
+    </script>
 </body>
 </html>

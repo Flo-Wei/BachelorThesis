@@ -13,19 +13,20 @@ from .init import db_manager
 logger = logging.getLogger(__name__)
 
 
-def create_user(username: str, email: str, session: Optional[Session] = None) -> User:
+def create_user(username: str, email: str, is_admin: bool = False, session: Optional[Session] = None) -> User:
     """Create a new user.
     
     Args:
         username: The username for the new user
         email: The email for the new user
+        is_admin: Whether the user should be an admin (default: False)
         session: Optional database session. If None, creates and manages session automatically.
     
     Returns:
         The created User object
     """
     def _create_user(db_session: Session) -> User:
-        user = User(username=username, email=email)
+        user = User(username=username, email=email, is_admin=is_admin)
         db_session.add(user)
         db_session.commit()
         db_session.refresh(user)

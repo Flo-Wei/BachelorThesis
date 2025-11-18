@@ -60,3 +60,13 @@ def get_current_user(user_id: int = Depends(verify_token), db: Session = Depends
             detail="User not found"
         )
     return user
+
+
+def get_admin_user(current_user: User = Depends(get_current_user)):
+    """Get current user and verify they are an admin."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user

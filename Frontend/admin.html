@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AI Chatbot System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        html, body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        body {
+            margin: 0;
+        }
+        
+        .container-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .admin-container-wrapper {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .admin-hero {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 0;
+        }
+        
+        .admin-hero h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .admin-hero p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .admin-content {
+            padding: 40px;
+        }
+        
+        .admin-table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .users-table {
+            min-width: 100%;
+        }
+        
+        .admin-actions {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .users-table thead {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .users-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .users-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .users-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        .users-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .users-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-admin {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .badge-user {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+        
+        .btn-refresh {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-refresh:hover {
+            background: #229954;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e74c3c;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+        
+        .close {
+            color: #95a5a6;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+            font-size: 0.95rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+        
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .form-checkbox input {
+            width: auto;
+            cursor: pointer;
+        }
+        
+        .form-checkbox span {
+            color: #34495e;
+            font-weight: 500;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">AI Chatbot System</a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="documentation.html" class="nav-link">API Docs</a>
+                </li>
+                <li class="nav-item">
+                    <a href="user.html" class="nav-link">Account</a>
+                </li>
+                <li class="nav-item">
+                    <a href="skills.html" class="nav-link">Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                </li>
+                <li class="nav-item" id="adminNavItem" style="display: none;">
+                    <a href="admin.html" class="nav-link active">Admin Panel</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-wrapper">
+        <!-- Hero Section -->
+        <section class="admin-hero">
+            <div class="admin-container-wrapper">
+                <h1>Admin Panel</h1>
+                <p>Manage user accounts and platform administration</p>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <div class="admin-container-wrapper" style="flex: 1;">
+            <div class="main-content">
+                <div class="admin-content">
+                    <div id="messageContainer"></div>
+                    
+                    <div class="admin-actions">
+                        <h2 style="margin: 0; border: none; padding: 0;">User Management</h2>
+                        <button class="btn-refresh" onclick="loadUsers()">Refresh Users</button>
+                    </div>
+                    
+                    <div class="admin-table-container">
+                        <div id="usersContainer">
+                            <div class="loading">Loading users...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeEditModal()">&times;</span>
+                <h2>Edit User</h2>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label class="form-label" for="editUsername">Username</label>
+                    <input type="text" id="editUsername" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editEmail">Email</label>
+                    <input type="email" id="editEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="editIsAdmin">
+                        <span>Admin User</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn" style="background: #e74c3c;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeDeleteModal()">&times;</span>
+                <h2>Delete User</h2>
+            </div>
+            <p>Are you sure you want to delete user <strong id="deleteUserName"></strong>?</p>
+            <p style="color: #e74c3c; font-weight: bold; margin-top: 15px;">This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn-delete" onclick="confirmDelete()">Delete User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script>
+        let currentDeleteUserId = null;
+        
+        // Check admin access on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!api.isAuthenticated()) {
+                window.location.href = 'user.html';
+                return;
+            }
+            
+            if (!api.isAdmin()) {
+                showMessage('Access denied. Admin privileges required.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                return;
+            }
+            
+            // Show admin nav link
+            if (typeof api !== 'undefined') {
+                api.updateAdminLinkVisibility();
+            }
+            
+            // Load users
+            loadUsers();
+        });
+        
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const className = type === 'error' ? 'error-message' : 'success-message';
+            container.innerHTML = `<div class="${className}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+        
+        async function loadUsers() {
+            const container = document.getElementById('usersContainer');
+            container.innerHTML = '<div class="loading">Loading users...</div>';
+            
+            try {
+                const users = await api.listAllUsers();
+                renderUsersTable(users);
+            } catch (error) {
+                container.innerHTML = `<div class="error-message">Error loading users: ${error.message}</div>`;
+            }
+        }
+        
+        function renderUsersTable(users) {
+            const container = document.getElementById('usersContainer');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="loading">No users found.</div>';
+                return;
+            }
+            
+            let html = `
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Admin</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            users.forEach(user => {
+                const createdDate = new Date(user.created_at).toLocaleDateString();
+                const badgeClass = user.is_admin ? 'badge-admin' : 'badge-user';
+                const badgeText = user.is_admin ? 'Admin' : 'User';
+                
+                html += `
+                    <tr>
+                        <td>${user.user_id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                        <td>${createdDate}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" onclick="openEditModal(${user.user_id}, '${user.username}', '${user.email}', ${user.is_admin})">Edit</button>
+                                <button class="btn-delete" onclick="openDeleteModal(${user.user_id}, '${user.username}')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function openEditModal(userId, username, email, isAdmin) {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editIsAdmin').checked = isAdmin;
+            document.getElementById('editModal').style.display = 'block';
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('editUserForm').reset();
+        }
+        
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = parseInt(document.getElementById('editUserId').value);
+            const username = document.getElementById('editUsername').value;
+            const email = document.getElementById('editEmail').value;
+            const isAdmin = document.getElementById('editIsAdmin').checked;
+            
+            try {
+                await api.updateUser(userId, {
+                    username: username,
+                    email: email,
+                    is_admin: isAdmin
+                });
+                
+                showMessage('User updated successfully!', 'success');
+                closeEditModal();
+                loadUsers();
+            } catch (error) {
+                showMessage(`Error updating user: ${error.message}`, 'error');
+            }
+        });
+        
+        function openDeleteModal(userId, username) {
+            currentDeleteUserId = userId;
+            document.getElementById('deleteUserName').textContent = username;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            currentDeleteUserId = null;
+        }
+        
+        async function confirmDelete() {
+            if (!currentDeleteUserId) return;
+            
+            try {
+                await api.deleteUser(currentDeleteUserId);
+                showMessage('User deleted successfully!', 'success');
+                closeDeleteModal();
+                loadUsers();
+            } catch (error) {
+                showMessage(`Error deleting user: ${error.message}`, 'error');
+            }
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
+            if (event.target === editModal) {
+                closeEditModal();
+            }
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        }
+    </script>
+</body>
+</html>
+

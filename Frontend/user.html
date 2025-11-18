@@ -237,6 +237,9 @@
                 <li class="nav-item">
                     <a href="chat.html" class="nav-link">Chat Demo</a>
                 </li>
+                <li class="nav-item" id="adminNavItem" style="display: none;">
+                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -274,6 +277,12 @@
                     <div class="form-group">
                         <label class="form-label" for="registerEmail">Email</label>
                         <input type="email" id="registerEmail" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="registerIsAdmin" style="margin-right: 8px; width: auto;">
+                            <span>Create as admin</span>
+                        </label>
                     </div>
                     <button type="submit" class="form-button">Create Account</button>
                 </form>
@@ -419,6 +428,11 @@
                 await api.loginUser(username);
                 showMessage('Login successful!', 'success');
                 
+                // Update admin link visibility immediately after login
+                if (typeof api !== 'undefined') {
+                    api.updateAdminLinkVisibility();
+                }
+                
                 setTimeout(() => {
                     showProfile();
                     loadUserProfile();
@@ -434,6 +448,7 @@
             e.preventDefault();
             const username = document.getElementById('registerUsername').value;
             const email = document.getElementById('registerEmail').value;
+            const isAdmin = document.getElementById('registerIsAdmin').checked;
             
             if (!username.trim() || !email.trim()) {
                 showMessage('Please fill in all fields', 'error');
@@ -442,8 +457,10 @@
 
             try {
                 showMessage('Creating account...', 'info');
-                await api.registerUser(username, email);
+                const newUser = await api.registerUser(username, email, isAdmin);
                 showMessage('Account created successfully! You can now login.', 'success');
+                
+                // Note: User needs to login to see admin link, but registration was successful
                 
                 // Switch to login mode
                 document.getElementById('loginUsername').value = username;
@@ -457,6 +474,7 @@
         function handleLogout() {
             if (confirm('Are you sure you want to logout?')) {
                 AuthUtils.logout();
+                // Admin link visibility is updated automatically by clearAuth()
             }
         }
 
@@ -551,6 +569,11 @@
             }
         `;
         document.head.appendChild(style);
+        
+        // Update admin link visibility on page load
+        if (typeof api !== 'undefined') {
+            api.updateAdminLinkVisibility();
+        }
     </script>
 </body>
 </html>

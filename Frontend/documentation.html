@@ -98,6 +98,9 @@
                 <li class="nav-item">
                     <a href="chat.html" class="nav-link">Chat Demo</a>
                 </li>
+                <li class="nav-item" id="adminNavItem" style="display: none;">
+                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -239,6 +242,11 @@
         
         // Refresh status every 30 seconds
         setInterval(checkApiStatus, 30000);
+        
+        // Update admin link visibility on page load
+        if (typeof api !== 'undefined') {
+            api.updateAdminLinkVisibility();
+        }
     </script>
 </body>
 </html>

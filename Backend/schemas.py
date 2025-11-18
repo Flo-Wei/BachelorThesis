@@ -9,16 +9,24 @@ from datetime import datetime
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
+    is_admin: bool = False
 
 
 class UserResponse(BaseModel):
     user_id: int
     username: str
     email: str
+    is_admin: bool
     created_at: datetime
     
     class Config:
         from_attributes = True
+
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    is_admin: Optional[bool] = None
 
 
 class UserLogin(BaseModel):

@@ -27,6 +27,9 @@
                 <li class="nav-item">
                     <a href="chat.html" class="nav-link">Chat Demo</a>
                 </li>
+                <li class="nav-item" id="adminNavItem" style="display: none;">
+                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -128,5 +131,12 @@
             <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
         </div>
     </footer>
+    <script src="js/api.js"></script>
+    <script>
+        // Update admin link visibility on page load
+        if (typeof api !== 'undefined') {
+            api.updateAdminLinkVisibility();
+        }
+    </script>
 </body>
 </html>
