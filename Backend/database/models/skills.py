@@ -31,6 +31,7 @@ class ESCOSkillModel(ChatSkillBase, table=True):
     preferred_label: Dict[str, str] = Field(sa_column=Column(JSON))
     description: Dict[str, str] = Field(sa_column=Column(JSON))
     links: Dict[str, Any] = Field(sa_column=Column(JSON))
+    evidence: Optional[str] = Field(default=None)
     
     skill_system: SkillSystem = Field(default=SkillSystem.ESCO, index=True)
     
@@ -54,12 +55,13 @@ class ESCOSkillModel(ChatSkillBase, table=True):
         return self.description.get(language, "No description available")
     
     @classmethod
-    def from_pydantic(cls, skill: ESCOSkill) -> "ESCOSkillModel":
+    def from_pydantic(cls, skill: ESCOSkill, evidence: Optional[str] = None) -> "ESCOSkillModel":
         return cls(
             uri=skill.uri,
             title=skill.title,
             reference_language=skill.reference_language,
             preferred_label=skill.preferred_label,
             description=skill.description,
-            links=skill.links
+            links=skill.links,
+            evidence=evidence
         )

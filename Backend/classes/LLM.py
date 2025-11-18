@@ -133,9 +133,11 @@ class OpenAILLM(BaseLLM):
         logging.info(f"response.output_text: {response_dict}")
         id = int(response_dict["id"])
         logging.info(f"id: {id} id_type: {type(id)}")
-        skill = available_skills[id]
+        # Preserve evidence from the original CustomSkill before overwriting the variable
+        evidence = skill.evidence
+        mapped_esco_skill = available_skills[id]
 
-        if isinstance(skill, ESCOSkill):
-            return ESCOSkillModel.from_pydantic(skill)
+        if isinstance(mapped_esco_skill, ESCOSkill):
+            return ESCOSkillModel.from_pydantic(mapped_esco_skill, evidence=evidence)
         else:
-            raise NotImplementedError(f"Mapping for skill type {type(skill)} is not implemented")
+            raise NotImplementedError(f"Mapping for skill type {type(mapped_esco_skill)} is not implemented")

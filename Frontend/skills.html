@@ -832,6 +832,12 @@
                                 <span class="skill-meta-label">Extracted from:</span>
                                 <span>Message #${skill.origin_message_id}</span>
                             </div>
+                            ${skill.evidence ? `
+                            <div class="skill-meta-item">
+                                <span class="skill-meta-label">Evidence:</span>
+                                <span>${skill.evidence}</span>
+                            </div>
+                            ` : ''}
                         </div>
                     </div>
                 `;

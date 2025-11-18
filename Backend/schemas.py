@@ -92,6 +92,7 @@ class SkillResponse(BaseModel):
     links: Dict[str, Any]
     origin_message_id: int
     session_id: int
+    evidence: Optional[str] = None
     
     class Config:
         from_attributes = True
