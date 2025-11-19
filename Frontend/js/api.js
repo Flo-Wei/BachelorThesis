@@ -149,14 +149,14 @@ class APIClient {
     // ===== USER MANAGEMENT =====
 
     async registerUser(username, email, isAdmin = false) {
-        return await this.request('/users/register', {
+        return await this.request('/api/users/register', {
             method: 'POST',
             body: JSON.stringify({ username, email, is_admin: isAdmin })
         });
     }
 
     async loginUser(username) {
-        const response = await this.request('/users/login', {
+        const response = await this.request('/api/users/login', {
             method: 'POST',
             body: JSON.stringify({ username })
         });
@@ -167,7 +167,7 @@ class APIClient {
     }
 
     async getUser(userId) {
-        return await this.request(`/users/${userId}`);
+        return await this.request(`/api/users/${userId}`);
     }
 
     // ===== ADMIN METHODS =====
@@ -197,26 +197,26 @@ class APIClient {
     // ===== CHAT SESSIONS =====
 
     async getUserSessions(userId) {
-        return await this.request(`/users/${userId}/sessions`);
+        return await this.request(`/api/users/${userId}/sessions`);
     }
 
     async createSession(userId, sessionName = null) {
-        return await this.request(`/users/${userId}/sessions`, {
+        return await this.request(`/api/users/${userId}/sessions`, {
             method: 'POST',
             body: JSON.stringify({ session_name: sessionName })
         });
     }
 
     async getSession(sessionId) {
-        return await this.request(`/sessions/${sessionId}`);
+        return await this.request(`/api/sessions/${sessionId}`);
     }
 
     async getSessionMessages(sessionId) {
-        return await this.request(`/sessions/${sessionId}/messages`);
+        return await this.request(`/api/sessions/${sessionId}/messages`);
     }
 
     async updateSession(sessionId, sessionName) {
-        return await this.request(`/sessions/${sessionId}`, {
+        return await this.request(`/api/sessions/${sessionId}`, {
             method: 'PUT',
             body: JSON.stringify({ session_name: sessionName })
         });
@@ -225,7 +225,7 @@ class APIClient {
     // ===== CHAT =====
 
     async sendMessage(userId, message, sessionId = null) {
-        return await this.request(`/users/${userId}/chat`, {
+        return await this.request(`/api/users/${userId}/chat`, {
             method: 'POST',
             body: JSON.stringify({ 
                 message, 
@@ -237,21 +237,21 @@ class APIClient {
     // ===== SKILLS =====
 
     async getSkillSystems() {
-        return await this.request('/skills/systems');
+        return await this.request('/api/skills/systems');
     }
 
     async getSessionSkills(sessionId, skillSystem) {
-        return await this.request(`/sessions/${sessionId}/skills/${skillSystem}`);
+        return await this.request(`/api/sessions/${sessionId}/skills/${skillSystem}`);
     }
 
     async getAllSessionSkills(sessionId) {
-        return await this.request(`/sessions/${sessionId}/skills`);
+        return await this.request(`/api/sessions/${sessionId}/skills`);
     }
 
     // ===== UTILITY =====
 
     async healthCheck() {
-        return await this.request('/health');
+        return await this.request('/api/health');
     }
 }
 

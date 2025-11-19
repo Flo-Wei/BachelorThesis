@@ -144,32 +144,32 @@
                     <p>Here are some of the main API endpoints available:</p>
                     
                     <div class="endpoint-preview">
-                        <span class="method post">POST</span><strong>/users/register</strong><br>
+                        <span class="method post">POST</span><strong>/api/users/register</strong><br>
                         <small>Register a new user account</small>
                     </div>
                     
                     <div class="endpoint-preview">
-                        <span class="method post">POST</span><strong>/users/login</strong><br>
+                        <span class="method post">POST</span><strong>/api/users/login</strong><br>
                         <small>Authenticate user credentials</small>
                     </div>
                     
                     <div class="endpoint-preview">
-                        <span class="method get">GET</span><strong>/users/{user_id}</strong><br>
+                        <span class="method get">GET</span><strong>/api/users/{user_id}</strong><br>
                         <small>Get user information by ID</small>
                     </div>
                     
                     <div class="endpoint-preview">
-                        <span class="method post">POST</span><strong>/chat/sessions</strong><br>
+                        <span class="method post">POST</span><strong>/api/users/{user_id}/sessions</strong><br>
                         <small>Create a new chat session</small>
                     </div>
                     
                     <div class="endpoint-preview">
-                        <span class="method get">GET</span><strong>/chat/sessions/{session_id}/messages</strong><br>
+                        <span class="method get">GET</span><strong>/api/sessions/{session_id}/messages</strong><br>
                         <small>Get all messages from a chat session</small>
                     </div>
                     
                     <div class="endpoint-preview">
-                        <span class="method post">POST</span><strong>/chat/message</strong><br>
+                        <span class="method post">POST</span><strong>/api/users/{user_id}/chat</strong><br>
                         <small>Send a message to the chatbot</small>
                     </div>
                     
