@@ -976,9 +976,7 @@
 
         function renderSessionsList() {
             const sessionsHTML = userSessions.map(session => {
-                const escoCount = session.esco_skills ? session.esco_skills.length : 0;
                 const customCount = session.custom_skills ? session.custom_skills.length : 0;
-                const totalCount = escoCount + customCount;
                 const isActive = session.session_id === currentSessionId;
                 
                 return `
@@ -986,7 +984,7 @@
                             data-session-id="${session.session_id}"
                             onclick="selectSession(${session.session_id})">
                         <div class="session-title">${session.session_name || 'Untitled Session'}</div>
-                        <div class="session-skills-count">${totalCount} skills extracted</div>
+                        <div class="session-skills-count">${customCount} skills extracted</div>
                     </button>
                 `;
             }).join('');
