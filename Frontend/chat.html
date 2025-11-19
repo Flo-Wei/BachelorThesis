@@ -208,6 +208,25 @@
             margin-top: 5px;
         }
         
+        .message.highlighted {
+            border: 2px solid #e74c3c;
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
+            animation: highlightPulse 2s ease-in-out;
+        }
+        
+        @keyframes highlightPulse {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(231, 76, 60, 0.5);
+            }
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
         .chat-input-container {
             padding: 20px;
             background: white;

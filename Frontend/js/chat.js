@@ -45,7 +45,23 @@ function initializePage() {
         userName.textContent = user.username;
     }
 
-    loadUserSessions();
+    // Check for URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionIdParam = urlParams.get('session_id');
+    const messageIdParam = urlParams.get('message_id');
+
+    if (sessionIdParam) {
+        // Load sessions first, then select the specified session
+        loadUserSessions().then(() => {
+            const sessionId = parseInt(sessionIdParam);
+            const messageId = messageIdParam ? parseInt(messageIdParam) : null;
+            if (sessionId) {
+                selectSession(sessionId, messageId);
+            }
+        });
+    } else {
+        loadUserSessions();
+    }
 }
 
 function setupEventListeners() {
@@ -105,7 +121,7 @@ function disableChat() {
 
 async function loadUserSessions() {
     const user = api.getCurrentUser();
-    if (!user) return;
+    if (!user) return Promise.resolve();
 
     try {
         userSessions = await api.getUserSessions(user.user_id);
@@ -115,13 +131,19 @@ async function loadUserSessions() {
         if (userSessions.length === 0) {
             await createNewChat();
         } else {
-            // Select the most recent session
-            selectSession(userSessions[0].session_id);
+            // Only auto-select if no URL parameters are present
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.get('session_id')) {
+                // Select the most recent session
+                selectSession(userSessions[0].session_id);
+            }
         }
         
+        return Promise.resolve();
     } catch (error) {
         console.error('Error loading sessions:', error);
         showSystemMessage('Failed to load chat sessions', 'error');
+        return Promise.resolve();
     }
 }
 
@@ -148,7 +170,7 @@ function renderSessionsList() {
     sessionsList.innerHTML = sessionsHTML;
 }
 
-async function selectSession(sessionId) {
+async function selectSession(sessionId, targetMessageId = null) {
     currentSessionId = sessionId;
     
     // Update UI to show selected session
@@ -166,10 +188,10 @@ async function selectSession(sessionId) {
     }
 
     // Load messages for this session
-    await loadSessionMessages();
+    await loadSessionMessages(targetMessageId);
 }
 
-async function loadSessionMessages() {
+async function loadSessionMessages(targetMessageId = null) {
     if (!currentSessionId) return;
 
     try {
@@ -178,16 +200,32 @@ async function loadSessionMessages() {
         // Clear current messages
         chatMessages.innerHTML = '';
         
-        if (messages.length === 0) {
+        // Filter out system messages (they contain the system prompt, not user-facing content)
+        const nonSystemMessages = messages.filter(message => {
+            const normalizedRole = message.role?.toUpperCase();
+            return normalizedRole !== 'SYSTEM';
+        });
+        
+        if (nonSystemMessages.length === 0) {
             showWelcomeMessage();
         } else {
-            // Render all messages
-            messages.forEach(message => {
-                displayMessage(message.message_content, message.role, message.timestamp);
+            // Show introductory greeting as the first message
+            showIntroductoryGreeting();
+            
+            // Render all non-system messages
+            nonSystemMessages.forEach(message => {
+                displayMessage(message.message_content, message.role, message.timestamp, message.message_id);
             });
         }
         
-        scrollToBottom();
+        // If we have a target message ID, scroll to and highlight it
+        if (targetMessageId) {
+            setTimeout(() => {
+                highlightAndScrollToMessage(targetMessageId);
+            }, 100);
+        } else {
+            scrollToBottom();
+        }
         
     } catch (error) {
         console.error('Error loading messages:', error);
@@ -199,15 +237,31 @@ function showWelcomeMessage() {
     const welcomeMessage = document.createElement('div');
     welcomeMessage.className = 'message bot';
     welcomeMessage.innerHTML = `
-        <div>Hello! I'm your AI assistant. How can I help you today?</div>
+        <div>Hello! I'm here to help assess your skills and competencies. I'll be asking you questions about your background, experience, and areas of expertise. This will help identify your qualifications and match them with relevant opportunities. Let's begin - can you tell me a little about your professional background?</div>
         <div class="message-time">Just now</div>
     `;
     chatMessages.appendChild(welcomeMessage);
 }
 
-function displayMessage(content, role, timestamp = null) {
+function showIntroductoryGreeting() {
+    const greetingMessage = document.createElement('div');
+    greetingMessage.className = 'message bot';
+    greetingMessage.innerHTML = `
+        <div>Hello! I'm here to help assess your skills and competencies. I'll be asking you questions about your background, experience, and areas of expertise. This will help identify your qualifications and match them with relevant opportunities. Let's begin - can you tell me a little about your professional background?</div>
+        <div class="message-time">Just now</div>
+    `;
+    chatMessages.appendChild(greetingMessage);
+}
+
+function displayMessage(content, role, timestamp = null, messageId = null) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${role === 'USER' ? 'user' : 'bot'}`;
+    // Normalize role to uppercase for comparison to handle both 'USER'/'user' and 'ASSISTANT'/'assistant'
+    const normalizedRole = role?.toUpperCase();
+    messageDiv.className = `message ${normalizedRole === 'USER' ? 'user' : 'bot'}`;
+    
+    if (messageId) {
+        messageDiv.setAttribute('data-message-id', messageId);
+    }
     
     const timeStr = timestamp ? UIUtils.formatTimeAgo(timestamp) : 'Just now';
     
@@ -241,7 +295,7 @@ async function sendMessage() {
         messageInput.disabled = true;
         sendButton.disabled = true;
         
-        // Display user message immediately
+        // Display user message immediately (message_id will be set after response)
         displayMessage(message, 'USER');
         
         // Clear input
@@ -266,7 +320,7 @@ async function sendMessage() {
         hideTypingIndicator();
         
         // Display assistant response
-        displayMessage(response.assistant_response.message_content, 'ASSISTANT');
+        displayMessage(response.assistant_response.message_content, 'ASSISTANT', null, response.assistant_response.message_id);
         
     } catch (error) {
         hideTypingIndicator();
@@ -292,6 +346,31 @@ function hideTypingIndicator() {
 
 function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function highlightAndScrollToMessage(messageId) {
+    // Remove any existing highlights
+    document.querySelectorAll('.message.highlighted').forEach(msg => {
+        msg.classList.remove('highlighted');
+    });
+    
+    // Find the message with the specified ID
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    
+    if (messageElement) {
+        // Add highlight class
+        messageElement.classList.add('highlighted');
+        
+        // Scroll to the message
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Remove highlight after animation completes
+        setTimeout(() => {
+            messageElement.classList.remove('highlighted');
+        }, 2000);
+    } else {
+        console.warn(`Message with ID ${messageId} not found`);
+    }
 }
 
 async function createNewChat() {
