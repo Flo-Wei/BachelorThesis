@@ -78,6 +78,7 @@ async def get_user_sessions(user_id: int, current_user: User = Depends(get_curre
         for skill in esco_skills:
             origin_message_id = skill.custom_skill.origin_message_id if skill.custom_skill else None
             custom_skill_id = skill.custom_skill_id if skill.custom_skill_id else None
+            custom_skill_name = skill.custom_skill.name if skill.custom_skill else None
             skill_response = SkillResponse(
                 id=skill.id,
                 skill_system=skill.skill_system,
@@ -89,6 +90,7 @@ async def get_user_sessions(user_id: int, current_user: User = Depends(get_curre
                 links=skill.links,
                 origin_message_id=origin_message_id,
                 custom_skill_id=custom_skill_id,
+                custom_skill_name=custom_skill_name,
                 session_id=skill.session_id,
                 evidence=skill.evidence
             )
@@ -236,6 +238,7 @@ async def get_session_skills(
         for skill in skills:
             origin_message_id = skill.custom_skill.origin_message_id if skill.custom_skill else None
             custom_skill_id = skill.custom_skill_id if skill.custom_skill_id else None
+            custom_skill_name = skill.custom_skill.name if skill.custom_skill else None
             skill_response = SkillResponse(
                 id=skill.id,
                 skill_system=skill.skill_system,
@@ -247,6 +250,7 @@ async def get_session_skills(
                 links=skill.links,
                 origin_message_id=origin_message_id,
                 custom_skill_id=custom_skill_id,
+                custom_skill_name=custom_skill_name,
                 session_id=skill.session_id,
                 evidence=skill.evidence
             )
@@ -314,6 +318,7 @@ async def get_all_session_skills(
     for skill in esco_skills:
         origin_message_id = skill.custom_skill.origin_message_id if skill.custom_skill else None
         custom_skill_id = skill.custom_skill_id if skill.custom_skill_id else None
+        custom_skill_name = skill.custom_skill.name if skill.custom_skill else None
         skill_response = SkillResponse(
             id=skill.id,
             skill_system=skill.skill_system,
@@ -325,6 +330,7 @@ async def get_all_session_skills(
             links=skill.links,
             origin_message_id=origin_message_id,
             custom_skill_id=custom_skill_id,
+            custom_skill_name=custom_skill_name,
             session_id=skill.session_id,
             evidence=skill.evidence
         )

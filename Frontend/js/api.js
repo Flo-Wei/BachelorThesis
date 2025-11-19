@@ -248,6 +248,24 @@ class APIClient {
         return await this.request(`/api/sessions/${sessionId}/skills`);
     }
 
+    async searchESCOSkills(query) {
+        return await this.request(`/api/skills/search/esco?query=${encodeURIComponent(query)}`);
+    }
+
+    async updateCustomSkill(skillId, skillData) {
+        return await this.request(`/api/skills/custom/${skillId}`, {
+            method: 'PUT',
+            body: JSON.stringify(skillData)
+        });
+    }
+
+    async updateESCOSkill(skillId, skillData) {
+        return await this.request(`/api/skills/esco/${skillId}`, {
+            method: 'PUT',
+            body: JSON.stringify(skillData)
+        });
+    }
+
     // ===== UTILITY =====
 
     async healthCheck() {

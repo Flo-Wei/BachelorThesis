@@ -100,6 +100,7 @@ class SkillResponse(BaseModel):
     links: Dict[str, Any]
     origin_message_id: Optional[int] = None  # Can be None for ESCO skills (get from custom_skill)
     custom_skill_id: Optional[int] = None  # ID of the CustomSkill this ESCO skill is mapped from
+    custom_skill_name: Optional[str] = None # Name of the CustomSkill this ESCO skill is mapped from
     session_id: int
     evidence: Optional[str] = None
     
@@ -120,6 +121,22 @@ class CustomSkillResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class CustomSkillUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    confidence: Optional[float] = None
+    evidence: Optional[str] = None
+
+
+class ESCOSkillUpdate(BaseModel):
+    title: Optional[str] = None
+    uri: Optional[str] = None
+    reference_language: Optional[str] = None
+    preferred_label: Optional[Dict[str, str]] = None
+    description: Optional[Dict[str, str]] = None
+    evidence: Optional[str] = None
 
 
 class ChatSessionWithSkillsResponse(ChatSessionResponse):

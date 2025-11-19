@@ -424,6 +424,147 @@
             font-size: 14px;
         }
         
+        /* Modal Styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%; 
+            max-width: 700px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            text-align: right;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-help {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+
+        /* Search Results in Modal */
+        .esco-search-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-results {
+            border: 1px solid #ddd;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 10px;
+            background: white;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .search-result-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .search-result-uri {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+        
+        .edit-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #95a5a6;
+            transition: all 0.2s;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .edit-btn:hover {
+            color: #3498db;
+            background-color: #ecf0f1;
+        }
+
         /* Override body for full-screen layout */
         body {
             margin: 0;
@@ -658,6 +799,20 @@
         </div>
     </footer>
 
+    <!-- Edit Skill Modal -->
+    <div id="editSkillModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModalBtn">&times;</span>
+            <h2 id="modalTitle">Edit Skill</h2>
+            <div id="modalBody">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button id="saveSkillBtn" class="action-btn" style="background: #3498db; color: white;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/config.js?v=1.0.0"></script>
     <script src="js/api.js?v=1.0.0"></script>
@@ -667,6 +822,8 @@
         let currentSkillSystem = 'ESCO';
         let currentLanguage = 'en';
         let userSessions = [];
+        let currentSessionSkills = [];
+        let currentSearchResults = [];
 
         // DOM elements
         const skillSystemSelector = document.getElementById('skillSystemSelector');
@@ -683,6 +840,14 @@
         const sortFilter = document.getElementById('sortFilter');
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
+        
+        // Modal elements
+        const modal = document.getElementById('editSkillModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const saveSkillBtn = document.getElementById('saveSkillBtn');
+        const modalBody = document.getElementById('modalBody');
+        const modalTitle = document.getElementById('modalTitle');
+        let currentEditingSkill = null;
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -859,6 +1024,7 @@
                 UIUtils.showLoading(skillsContent);
                 
                 const skills = await api.getSessionSkills(currentSessionId, currentSkillSystem);
+                currentSessionSkills = skills;
                 
                 if (skills.length === 0) {
                     showEmptyState();
@@ -914,7 +1080,10 @@
                         <div class="skill-card" data-skill-id="${skill.id}">
                             <div class="skill-header">
                                 <h3 class="skill-title">${skill.name}</h3>
-                                <span class="skill-system-badge">CUSTOM</span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="skill-system-badge">CUSTOM</span>
+                                    <button class="edit-btn" onclick="openEditModal(${skill.id}, 'CUSTOM')" title="Edit Skill">✎</button>
+                                </div>
                             </div>
                             <div class="skill-description">
                                 ${skill.evidence || 'No description available'}
@@ -944,7 +1113,10 @@
                         <div class="skill-card" data-skill-id="${skill.id}">
                             <div class="skill-header">
                                 <h3 class="skill-title">${title}</h3>
-                                <span class="skill-system-badge">${skill.skill_system}</span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="skill-system-badge">${skill.skill_system}</span>
+                                    <button class="edit-btn" onclick="openEditModal(${skill.id}, '${skill.skill_system}')" title="Edit Skill">✎</button>
+                                </div>
                             </div>
                             <div class="skill-description">
                                 ${description || 'No description available'}
@@ -1071,6 +1243,209 @@
             }
         }
         
+        function openEditModal(skillId, skillSystem) {
+            const skill = currentSessionSkills.find(s => s.id === skillId);
+            if (!skill) return;
+            
+            currentEditingSkill = skill;
+            renderEditForm(skill);
+            modal.style.display = 'block';
+        }
+
+        function renderEditForm(skill) {
+            if (skill.skill_system === 'CUSTOM' || !skill.uri) {
+                // Custom Skill Form
+                modalTitle.textContent = 'Edit Custom Skill';
+                modalBody.innerHTML = `
+                    <div class="form-group">
+                        <label for="skillName">Skill Name</label>
+                        <input type="text" id="skillName" value="${skill.name.replace(/"/g, '&quot;')}">
+                    </div>
+                    <div class="form-group">
+                        <label for="skillType">Type</label>
+                        <select id="skillType">
+                            <option value="technical" ${skill.type === 'technical' ? 'selected' : ''}>Technical</option>
+                            <option value="soft" ${skill.type === 'soft' ? 'selected' : ''}>Soft Skill</option>
+                            <option value="domain-specific" ${skill.type === 'domain-specific' ? 'selected' : ''}>Domain-Specific</option>
+                            <option value="other" ${skill.type === 'other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="skillConfidence">Confidence (0-1)</label>
+                        <input type="number" id="skillConfidence" step="0.01" min="0" max="1" value="${skill.confidence}">
+                    </div>
+                    <div class="form-group">
+                        <label for="skillEvidence">Evidence</label>
+                        <textarea id="skillEvidence">${(skill.evidence || '').replace(/</g, '&lt;')}</textarea>
+                    </div>
+                `;
+            } else {
+                // ESCO Skill Form
+                modalTitle.textContent = 'Edit ESCO Skill';
+                const description = JSON.stringify(skill.description, null, 2);
+                const preferredLabel = JSON.stringify(skill.preferred_label, null, 2);
+                const defaultSearch = skill.custom_skill_name || '';
+                
+                modalBody.innerHTML = `
+                    <div class="esco-search-container">
+                        <label style="font-weight:bold; display:block; margin-bottom:5px;">Remap Skill (Search ESCO)</label>
+                        <div class="search-input-group">
+                            <input type="text" id="escoSearchInput" placeholder="Search for ESCO skills..." value="${defaultSearch.replace(/"/g, '&quot;')}" onkeypress="if(event.key === 'Enter') handleESCOSearch()">
+                            <button class="action-btn" onclick="handleESCOSearch()">Search</button>
+                        </div>
+                        <div id="escoSearchResults" class="search-results"></div>
+                    </div>
+                    
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                    
+                    <div class="form-group">
+                        <label for="skillTitle">Title</label>
+                        <input type="text" id="skillTitle" value="${skill.title.replace(/"/g, '&quot;')}">
+                    </div>
+                    <div class="form-group">
+                        <label for="skillUri">URI</label>
+                        <input type="text" id="skillUri" value="${skill.uri}">
+                    </div>
+                    <div class="form-group">
+                        <label for="skillDescription">Description (JSON)</label>
+                        <textarea id="skillDescription" style="font-family: monospace; font-size: 12px;" rows="10">${description.replace(/</g, '&lt;')}</textarea>
+                        <div class="form-help">Must be valid JSON mapping language codes to text.</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="skillEvidence">Evidence</label>
+                        <textarea id="skillEvidence">${(skill.evidence || '').replace(/</g, '&lt;')}</textarea>
+                    </div>
+                    <!-- Hidden fields for complexity reduction -->
+                    <input type="hidden" id="skillPreferredLabel" value='${preferredLabel.replace(/'/g, "&#39;")}'>
+                    <input type="hidden" id="skillRefLang" value="${skill.reference_language}">
+                `;
+            }
+        }
+
+        async function handleESCOSearch() {
+            const query = document.getElementById('escoSearchInput').value;
+            if (!query) return;
+            
+            const resultsContainer = document.getElementById('escoSearchResults');
+            resultsContainer.innerHTML = '<div style="padding:10px;">Searching...</div>';
+            resultsContainer.style.display = 'block';
+            
+            try {
+                const results = await api.searchESCOSkills(query);
+                currentSearchResults = results;
+                
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = '<div style="padding:10px;">No results found.</div>';
+                    return;
+                }
+                
+                resultsContainer.innerHTML = results.map((skill, index) => {
+                     return `
+                        <div class="search-result-item" onclick="selectESCOSkill(${index})">
+                            <div class="search-result-title">${skill.title}</div>
+                            <div class="search-result-uri">${skill.uri}</div>
+                        </div>
+                     `;
+                }).join('');
+            } catch (error) {
+                resultsContainer.innerHTML = `<div style="padding:10px; color:red;">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function selectESCOSkill(index) {
+            try {
+                const skill = currentSearchResults[index];
+                if (!skill) {
+                    console.error('Skill not found at index', index);
+                    return;
+                }
+                
+                // Update form fields
+                document.getElementById('skillTitle').value = skill.title;
+                document.getElementById('skillUri').value = skill.uri;
+                document.getElementById('skillDescription').value = JSON.stringify(skill.description, null, 2);
+                document.getElementById('skillPreferredLabel').value = JSON.stringify(skill.preferred_label, null, 2);
+                document.getElementById('skillRefLang').value = skill.reference_language;
+                
+                // Hide search results
+                document.getElementById('escoSearchResults').style.display = 'none';
+                
+                // Flash fields to indicate update
+                const inputs = ['skillTitle', 'skillUri', 'skillDescription'];
+                inputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    el.style.backgroundColor = '#e8f4fd';
+                    setTimeout(() => el.style.backgroundColor = '', 500);
+                });
+                
+            } catch (error) {
+                console.error('Error selecting skill:', error);
+                alert('Failed to select skill data');
+            }
+        }
+
+        async function saveSkill() {
+            if (!currentEditingSkill) return;
+            
+            const originalText = saveSkillBtn.textContent;
+            saveSkillBtn.textContent = 'Saving...';
+            saveSkillBtn.disabled = true;
+            
+            try {
+                const isCustom = currentEditingSkill.skill_system === 'CUSTOM' || !currentEditingSkill.uri;
+                
+                if (isCustom) {
+                    const data = {
+                        name: document.getElementById('skillName').value,
+                        type: document.getElementById('skillType').value,
+                        confidence: parseFloat(document.getElementById('skillConfidence').value),
+                        evidence: document.getElementById('skillEvidence').value
+                    };
+                    
+                    await api.updateCustomSkill(currentEditingSkill.id, data);
+                } else {
+                    const data = {
+                        title: document.getElementById('skillTitle').value,
+                        uri: document.getElementById('skillUri').value,
+                        description: JSON.parse(document.getElementById('skillDescription').value),
+                        preferred_label: JSON.parse(document.getElementById('skillPreferredLabel').value),
+                        reference_language: document.getElementById('skillRefLang').value,
+                        evidence: document.getElementById('skillEvidence').value
+                    };
+                    
+                    await api.updateESCOSkill(currentEditingSkill.id, data);
+                }
+                
+                // Refresh skills
+                await loadSessionSkills();
+                modal.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error saving skill:', error);
+                alert('Failed to save skill: ' + error.message);
+            } finally {
+                saveSkillBtn.textContent = originalText;
+                saveSkillBtn.disabled = false;
+            }
+        }
+
+        closeModalBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        
+        saveSkillBtn.onclick = saveSkill;
+        
+        // Expose functions to window
+        window.openEditModal = openEditModal;
+        window.handleESCOSearch = handleESCOSearch;
+        window.selectESCOSkill = selectESCOSkill;
+
         // Make selectSession global so it can be called from onclick
         window.selectSession = selectSession;
         
