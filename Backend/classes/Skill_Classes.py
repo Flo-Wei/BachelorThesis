@@ -1,15 +1,24 @@
 from pydantic import BaseModel, Field
-from typing import Literal, Dict, List, Optional
+from typing import Literal, Dict, List, Optional, Any
 
 
 class BaseSkill(BaseModel):
-    pass
+    def export_to_schemaorg(self, language: str = "en") -> Dict[str, Any]:
+        raise NotImplementedError
 
 class CustomSkill(BaseSkill):
     name: str
-    type: Literal["technical", "soft", "domain-specific", "other"]
+    type: str  # Changed from Literal to str to be more forgiving with DB values
     confidence: float = Field(ge=0, le=1)
     evidence: str = Field(description="Direct quote or paraphrased section of the interview that supports the inference.")
+
+    def export_to_schemaorg(self, language: str = "en") -> Dict[str, Any]:
+        return {
+            "@type": "DefinedTerm",
+            "name": self.name,
+            "description": self.evidence,
+            "additionalType": self.type
+        }
 
 class ESCOSkill(BaseSkill):
     uri: str
@@ -34,6 +43,20 @@ class ESCOSkill(BaseSkill):
         if language is None:
             language = self.reference_language
         return self.description.get(language, "No description available")
+    
+    def export_to_schemaorg(self, language: str = "en") -> Dict[str, Any]:
+        return {
+            "@type": "DefinedTerm",
+            "termCode": self.uri,
+            "name": self.get_preferred_label(language),
+            "description": self.get_description(language),
+            "inDefinedTermSet": {
+                "@type": "DefinedTermSet",
+                "name": "ESCO - European Skills, Competences, Qualifications and Occupations",
+                "url": "https://esco.ec.europa.eu/",
+            }
+        }
+
  
 
 class SkillList(BaseModel):

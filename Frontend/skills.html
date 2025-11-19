@@ -1121,8 +1121,59 @@
         }
 
         function exportSkills() {
-            // Placeholder for export functionality
-            alert('Export functionality will be implemented in a future update.');
+            if (!currentSessionId) {
+                alert(t('skills.no_session_selected') || 'Please select a session first');
+                return;
+            }
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/user.html';
+                return;
+            }
+            
+            const url = `/api/sessions/${currentSessionId}/skills/export?skill_system=${currentSkillSystem}&language=${currentLanguage}`;
+            
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Export failed:', response.status, errorText);
+                    throw new Error(`Export failed: ${response.status} - ${errorText}`);
+                }
+                // Try to get filename from Content-Disposition header
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = `skills_export_${currentSessionId}_${currentSkillSystem}.json`;
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    const matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) { 
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                const blob = await response.blob();
+                return { blob, filename };
+            })
+            .then(({ blob, filename }) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                alert(t('skills.export_error') || 'Failed to export skills');
+            });
         }
 
         function highlightAndScrollToSkill(skillId) {

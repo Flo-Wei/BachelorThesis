@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.responses import JSONResponse, Response
 from sqlmodel import Session, select
 from sqlalchemy.orm import joinedload
-from typing import List, Dict
+from typing import List, Dict, Any
 import logging
+import json
 
 from Backend.database.init import get_db_session_dependency
 from Backend.database.models.users import User
@@ -203,6 +205,105 @@ async def get_session_messages(session_id: int, current_user: User = Depends(get
         .order_by(ChatMessage.timestamp)
     ).all()
     return messages
+
+
+@router.get("/sessions/{session_id}/skills/export")
+async def export_session_skills(
+    session_id: int,
+    skill_system: SkillSystem = Query(..., description="Skill system to export"),
+    format: str = Query("json", description="Export format"),
+    language: str = Query("en", description="Language code"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session_dependency)
+):
+    """Export skills for a chat session in Schema.org format."""
+    logger.info(f"Exporting skills for session {session_id}, system {skill_system}")
+    
+    session = db.get(ChatSession, session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chat session not found"
+        )
+    
+    # Check if session belongs to current user
+    if session.user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this chat session"
+        )
+
+    exported_skills = []
+
+    if skill_system == SkillSystem.ESCO:
+        from sqlalchemy.orm import selectinload
+        from Backend.classes.Skill_Classes import ESCOSkill
+        
+        stmt = select(ESCOSkillModel).where(ESCOSkillModel.session_id == session_id).options(selectinload(ESCOSkillModel.custom_skill))
+        skills = db.exec(stmt).all()
+        
+        for skill_model in skills:
+            try:
+                 esco_skill = ESCOSkill(
+                     uri=skill_model.uri,
+                     title=skill_model.title,
+                     reference_language=skill_model.reference_language,
+                     preferred_label=skill_model.preferred_label,
+                     description=skill_model.description,
+                     links=skill_model.links
+                 )
+                 exported_skills.append(esco_skill.export_to_schemaorg(language))
+            except Exception as e:
+                logger.error(f"Error exporting ESCO skill {skill_model.id}: {e}")
+                continue
+             
+    elif skill_system == SkillSystem.CUSTOM:
+        from Backend.classes.Skill_Classes import CustomSkill
+        
+        skills = db.exec(
+            select(CustomSkillModel)
+            .where(CustomSkillModel.session_id == session_id)
+        ).all()
+        
+        for skill_model in skills:
+            # Handle enum type or string
+            skill_type = skill_model.type.value if hasattr(skill_model.type, 'value') else str(skill_model.type)
+            
+            # Clean up evidence to avoid potential validation issues if it's None
+            evidence = skill_model.evidence if skill_model.evidence else ""
+            
+            # Map database fields directly without Pydantic validation first if needed, 
+            # but here we use the Pydantic model which should be safe now with relaxed type.
+            try:
+                custom_skill = CustomSkill(
+                    name=skill_model.name,
+                    type=skill_type,
+                    confidence=skill_model.confidence,
+                    evidence=evidence
+                )
+                exported_skills.append(custom_skill.export_to_schemaorg(language))
+            except Exception as e:
+                logger.error(f"Error exporting custom skill {skill_model.id}: {e}")
+                # Continue with other skills even if one fails
+                continue
+    
+    # Construct response
+    export_data = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": exported_skills
+    }
+    
+    # Format JSON with indentation (4 spaces)
+    formatted_json = json.dumps(export_data, indent=4, ensure_ascii=False)
+    
+    return Response(
+        content=formatted_json,
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f"attachment; filename=skills_export_{session_id}_{skill_system.value}.json"
+        }
+    )
 
 
 @router.get("/sessions/{session_id}/skills/{skill_system}")
