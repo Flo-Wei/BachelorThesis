@@ -80,6 +80,7 @@ class APIClient {
         const config = {
             headers: {
                 'Content-Type': 'application/json',
+                'Accept-Language': localStorage.getItem('user_language') || 'en',
                 ...options.headers
             },
             ...options
@@ -343,10 +344,17 @@ const UIUtils = {
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
 
-        if (diffMins < 1) return 'Just now';
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
+        const t = (key, defaultText) => {
+            if (typeof window !== 'undefined' && window.t) {
+                return window.t(key);
+            }
+            return defaultText;
+        };
+
+        if (diffMins < 1) return t('time.just_now', 'Just now');
+        if (diffMins < 60) return `${diffMins}${t('time.ago_m', 'm ago')}`;
+        if (diffHours < 24) return `${diffHours}${t('time.ago_h', 'h ago')}`;
+        if (diffDays < 7) return `${diffDays}${t('time.ago_d', 'd ago')}`;
         return UIUtils.formatDate(dateString);
     }
 };

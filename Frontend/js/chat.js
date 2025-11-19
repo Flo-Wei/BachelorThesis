@@ -13,6 +13,14 @@ let sessionsList, chatTitle, chatMessages, messageInput, sendButton;
 let connectionStatus, typingIndicator, newChatBtn, userAvatar, userName;
 let clearChatBtn, exportChatBtn;
 
+// Helper for translations
+function t(key) {
+    if (typeof window !== 'undefined' && window.t) {
+        return window.t(key);
+    }
+    return key;
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     if (!AuthUtils.requireAuth()) return;
@@ -21,6 +29,20 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePage();
     setupEventListeners();
     checkConnectionStatus();
+});
+
+// Listen for language changes
+window.addEventListener('languageChanged', () => {
+    if (currentSessionId) {
+        // Reload session messages/title if needed (though messages content won't change, just metadata)
+        // For now, mainly static UI updates.
+        // Update placeholder
+        if (!messageInput.disabled) {
+            messageInput.placeholder = t('chat.input_placeholder');
+        }
+    }
+    // Reload session list to update dates
+    renderSessionsList();
 });
 
 function initializeElements() {
@@ -94,10 +116,10 @@ function autoResizeTextarea() {
 async function checkConnectionStatus() {
     try {
         await api.healthCheck();
-        updateConnectionStatus('connected', 'Connected to server');
+        updateConnectionStatus('connected', t('docs.status_online') || 'Connected to server');
         enableChat();
     } catch (error) {
-        updateConnectionStatus('disconnected', 'Server unavailable');
+        updateConnectionStatus('disconnected', t('docs.status_offline') || 'Server unavailable');
         disableChat();
     }
 }
@@ -110,7 +132,7 @@ function updateConnectionStatus(status, message) {
 function enableChat() {
     messageInput.disabled = false;
     sendButton.disabled = false;
-    messageInput.placeholder = 'Message AI Assistant...';
+    messageInput.placeholder = t('chat.input_placeholder');
 }
 
 function disableChat() {
@@ -142,7 +164,7 @@ async function loadUserSessions() {
         return Promise.resolve();
     } catch (error) {
         console.error('Error loading sessions:', error);
-        showSystemMessage('Failed to load chat sessions', 'error');
+        showSystemMessage(`${t('common.error')}: Failed to load chat sessions`, 'error');
         return Promise.resolve();
     }
 }
@@ -150,13 +172,13 @@ async function loadUserSessions() {
 function renderSessionsList() {
     const sessionsHTML = userSessions.map(session => {
         const isActive = session.session_id === currentSessionId;
-        const sessionName = session.session_name || 'New Chat';
+        const sessionName = session.session_name || t('chat.new_chat');
         
         return `
             <div class="session-item ${isActive ? 'active' : ''}" data-session-id="${session.session_id}">
                 <div class="session-content" onclick="selectSession(${session.session_id})">
                     <div class="session-title">${sessionName}</div>
-                    <div class="session-preview">Session from ${UIUtils.formatTimeAgo(session.created_at)}</div>
+                    <div class="session-preview">${t('common.session_from')} ${UIUtils.formatTimeAgo(session.created_at)}</div>
                 </div>
                 <div class="session-actions">
                     <button class="session-action-btn" onclick="renameSession(${session.session_id}, '${sessionName.replace(/'/g, "\\'")}')">
@@ -184,7 +206,7 @@ async function selectSession(sessionId, targetMessageId = null) {
     // Update chat title
     const session = userSessions.find(s => s.session_id === sessionId);
     if (session) {
-        chatTitle.textContent = session.session_name || 'New Chat';
+        chatTitle.textContent = session.session_name || t('chat.new_chat');
     }
 
     // Load messages for this session
@@ -229,7 +251,7 @@ async function loadSessionMessages(targetMessageId = null) {
         
     } catch (error) {
         console.error('Error loading messages:', error);
-        showSystemMessage('Failed to load chat history', 'error');
+        showSystemMessage(`${t('common.error')}: Failed to load chat history`, 'error');
     }
 }
 
@@ -237,8 +259,8 @@ function showWelcomeMessage() {
     const welcomeMessage = document.createElement('div');
     welcomeMessage.className = 'message bot';
     welcomeMessage.innerHTML = `
-        <div>Hello! I'm here to help assess your skills and competencies. I'll be asking you questions about your background, experience, and areas of expertise. This will help identify your qualifications and match them with relevant opportunities. Let's begin - can you tell me a little about your professional background?</div>
-        <div class="message-time">Just now</div>
+        <div>${t('chat.greeting_2')}</div>
+        <div class="message-time">${t('time.just_now')}</div>
     `;
     chatMessages.appendChild(welcomeMessage);
 }
@@ -247,8 +269,8 @@ function showIntroductoryGreeting() {
     const greetingMessage = document.createElement('div');
     greetingMessage.className = 'message bot';
     greetingMessage.innerHTML = `
-        <div>Hello! I'm here to help assess your skills and competencies. I'll be asking you questions about your background, experience, and areas of expertise. This will help identify your qualifications and match them with relevant opportunities. Let's begin - can you tell me a little about your professional background?</div>
-        <div class="message-time">Just now</div>
+        <div>${t('chat.greeting_2')}</div>
+        <div class="message-time">${t('time.just_now')}</div>
     `;
     chatMessages.appendChild(greetingMessage);
 }
@@ -263,7 +285,7 @@ function displayMessage(content, role, timestamp = null, messageId = null) {
         messageDiv.setAttribute('data-message-id', messageId);
     }
     
-    const timeStr = timestamp ? UIUtils.formatTimeAgo(timestamp) : 'Just now';
+    const timeStr = timestamp ? UIUtils.formatTimeAgo(timestamp) : t('time.just_now');
     
     messageDiv.innerHTML = `
         <div>${content}</div>
@@ -325,7 +347,7 @@ async function sendMessage() {
     } catch (error) {
         hideTypingIndicator();
         console.error('Error sending message:', error);
-        showSystemMessage(`Error: ${error.message}`, 'error');
+        showSystemMessage(`${t('common.error')}: ${error.message}`, 'error');
     } finally {
         // Re-enable input
         isWaitingForResponse = false;
@@ -378,13 +400,13 @@ async function createNewChat() {
     if (!user) return;
 
     // Prompt user for chat name
-    const chatName = prompt('Enter a name for your new chat:', 'New Chat');
+    const chatName = prompt(t('chat.new_chat_prompt') || 'Enter a name for your new chat:', t('chat.new_chat'));
     
     // If user cancels or enters empty string, don't create chat
     if (chatName === null) return;
     
     // Use default name if user enters empty string
-    const sessionName = chatName.trim() || 'New Chat';
+    const sessionName = chatName.trim() || t('chat.new_chat');
 
     try {
         const session = await api.createSession(user.user_id, sessionName);
@@ -402,17 +424,17 @@ async function createNewChat() {
         
     } catch (error) {
         console.error('Error creating new chat:', error);
-        showSystemMessage('Failed to create new chat', 'error');
+        showSystemMessage(`${t('common.error')}: Failed to create new chat`, 'error');
     }
 }
 
 function clearCurrentChat() {
     if (!currentSessionId) return;
     
-    if (confirm('Are you sure you want to clear this chat? This cannot be undone.')) {
+    if (confirm(t('chat.confirm_clear') || 'Are you sure you want to clear this chat? This cannot be undone.')) {
         chatMessages.innerHTML = '';
         showWelcomeMessage();
-        showSystemMessage('Chat cleared locally. Note: messages are still stored on the server.', 'info');
+        showSystemMessage(t('chat.cleared_msg') || 'Chat cleared locally. Note: messages are still stored on the server.', 'info');
     }
 }
 
@@ -441,13 +463,13 @@ function exportChat() {
 
 async function renameSession(sessionId, currentName) {
     // Prompt user for new name
-    const newName = prompt('Enter a new name for this chat:', currentName);
+    const newName = prompt(t('chat.rename_prompt') || 'Enter a new name for this chat:', currentName);
     
     // If user cancels or enters empty string, don't rename
     if (newName === null || newName.trim() === currentName.trim()) return;
     
     // Use default name if user enters empty string
-    const sessionName = newName.trim() || 'New Chat';
+    const sessionName = newName.trim() || t('chat.new_chat');
 
     try {
         await api.updateSession(sessionId, sessionName);
@@ -464,11 +486,11 @@ async function renameSession(sessionId, currentName) {
             }
         }
         
-        showSystemMessage(`Chat renamed to "${sessionName}"`, 'info');
+        showSystemMessage(`${t('chat.renamed_msg') || 'Chat renamed to'} "${sessionName}"`, 'info');
         
     } catch (error) {
         console.error('Error renaming chat:', error);
-        showSystemMessage('Failed to rename chat', 'error');
+        showSystemMessage(`${t('common.error')}: Failed to rename chat`, 'error');
     }
 }
 

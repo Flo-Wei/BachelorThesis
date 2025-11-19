@@ -10,25 +10,25 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">AI Chatbot System</a>
+            <a href="#" class="logo" data-i18n="nav.home">AI Chatbot System</a>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="index.html" class="nav-link active">Home</a>
+                    <a href="index.html" class="nav-link active" data-i18n="nav.home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a href="documentation.html" class="nav-link">API Docs</a>
+                    <a href="documentation.html" class="nav-link" data-i18n="nav.docs">API Docs</a>
                 </li>
                 <li class="nav-item">
-                    <a href="user.html" class="nav-link">Account</a>
+                    <a href="user.html" class="nav-link" data-i18n="nav.account">Account</a>
                 </li>
                 <li class="nav-item">
-                    <a href="skills.html" class="nav-link">Skills</a>
+                    <a href="skills.html" class="nav-link" data-i18n="nav.skills">Skills</a>
                 </li>
                 <li class="nav-item">
-                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                    <a href="chat.html" class="nav-link" data-i18n="nav.chat">Chat Demo</a>
                 </li>
                 <li class="nav-item" id="adminNavItem" style="display: none;">
-                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                    <a href="admin.html" class="nav-link" data-i18n="nav.admin">Admin Panel</a>
                 </li>
             </ul>
         </div>
@@ -37,8 +37,8 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1>AI-Powered Chatbot System</h1>
-            <p>A comprehensive Bachelor Thesis project exploring advanced conversational AI with user management, skill-based interactions, and intelligent message handling.</p>
+            <h1 data-i18n="home.hero_title">AI-Powered Chatbot System</h1>
+            <p data-i18n="home.hero_desc">A comprehensive Bachelor Thesis project exploring advanced conversational AI with user management, skill-based interactions, and intelligent message handling.</p>
         </div>
     </section>
 
@@ -46,8 +46,8 @@
     <div class="container">
         <div class="main-content">
             <div class="content-section">
-                <h2>Project Overview</h2>
-                <p>
+                <h2 data-i18n="home.project_overview">Project Overview</h2>
+                <p data-i18n="home.project_overview_text">
                     This Bachelor Thesis project presents a sophisticated AI chatbot system built with modern web technologies. 
                     The system integrates advanced language models with a robust backend architecture to provide intelligent, 
                     context-aware conversations while maintaining user sessions and managing complex skill-based interactions.
@@ -56,70 +56,70 @@
                 <div class="features">
                     <div class="feature-card">
                         <div class="feature-icon">🤖</div>
-                        <h3>Advanced AI Integration</h3>
-                        <p>Utilizes cutting-edge language models for natural, context-aware conversations with intelligent response generation.</p>
+                        <h3 data-i18n="home.features.ai">Advanced AI Integration</h3>
+                        <p data-i18n="home.features.ai_desc">Utilizes cutting-edge language models for natural, context-aware conversations with intelligent response generation.</p>
                     </div>
                     
                     <div class="feature-card">
                         <div class="feature-icon">👥</div>
-                        <h3>User Management</h3>
-                        <p>Comprehensive user authentication and session management system with persistent chat histories.</p>
+                        <h3 data-i18n="home.features.users">User Management</h3>
+                        <p data-i18n="home.features.users_desc">Comprehensive user authentication and session management system with persistent chat histories.</p>
                     </div>
                     
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
-                        <h3>Skill-Based Architecture</h3>
-                        <p>Modular skill system allowing the chatbot to perform specific tasks and provide specialized responses.</p>
+                        <h3 data-i18n="home.features.skills">Skill-Based Architecture</h3>
+                        <p data-i18n="home.features.skills_desc">Modular skill system allowing the chatbot to perform specific tasks and provide specialized responses.</p>
                     </div>
                     
                     <div class="feature-card">
                         <div class="feature-icon">🔗</div>
-                        <h3>Real-time Communication</h3>
-                        <p>WebSocket-based real-time messaging for instant response delivery and seamless user experience.</p>
+                        <h3 data-i18n="home.features.realtime">Real-time Communication</h3>
+                        <p data-i18n="home.features.realtime_desc">WebSocket-based real-time messaging for instant response delivery and seamless user experience.</p>
                     </div>
                     
                     <div class="feature-card">
                         <div class="feature-icon">🛡️</div>
-                        <h3>Secure Backend</h3>
-                        <p>FastAPI-powered backend with robust database integration and secure API endpoints.</p>
+                        <h3 data-i18n="home.features.backend">Secure Backend</h3>
+                        <p data-i18n="home.features.backend_desc">FastAPI-powered backend with robust database integration and secure API endpoints.</p>
                     </div>
                     
                     <div class="feature-card">
                         <div class="feature-icon">📊</div>
-                        <h3>Data Management</h3>
-                        <p>Sophisticated database schema for managing users, messages, chat sessions, and skill configurations.</p>
+                        <h3 data-i18n="home.features.data">Data Management</h3>
+                        <p data-i18n="home.features.data_desc">Sophisticated database schema for managing users, messages, chat sessions, and skill configurations.</p>
                     </div>
                 </div>
 
-                <h2>Technical Architecture</h2>
-                <p>
+                <h2 data-i18n="home.tech_arch">Technical Architecture</h2>
+                <p data-i18n="home.tech_arch_text">
                     The system is built using a modern tech stack that ensures scalability, maintainability, and performance:
                 </p>
                 <ul style="margin-left: 20px; margin-bottom: 20px;">
-                    <li><strong>Backend:</strong> FastAPI with Python for high-performance API development</li>
-                    <li><strong>Database:</strong> SQLModel/SQLite for data persistence and relationship management</li>
-                    <li><strong>AI Integration:</strong> Custom LLM wrapper classes for flexible model integration</li>
-                    <li><strong>Real-time Communication:</strong> WebSocket protocol for instant messaging</li>
-                    <li><strong>Frontend:</strong> Clean HTML/CSS/JavaScript for user interface</li>
-                    <li><strong>Environment Management:</strong> UV package manager for Python dependencies</li>
+                    <li><strong data-i18n="home.tech.backend">Backend:</strong> <span data-i18n="home.tech.backend_desc">FastAPI with Python for high-performance API development</span></li>
+                    <li><strong data-i18n="home.tech.db">Database:</strong> <span data-i18n="home.tech.db_desc">SQLModel/SQLite for data persistence and relationship management</span></li>
+                    <li><strong data-i18n="home.tech.ai">AI Integration:</strong> <span data-i18n="home.tech.ai_desc">Custom LLM wrapper classes for flexible model integration</span></li>
+                    <li><strong data-i18n="home.tech.realtime">Real-time Communication:</strong> <span data-i18n="home.tech.realtime_desc">WebSocket protocol for instant messaging</span></li>
+                    <li><strong data-i18n="home.tech.frontend">Frontend:</strong> <span data-i18n="home.tech.frontend_desc">Clean HTML/CSS/JavaScript for user interface</span></li>
+                    <li><strong data-i18n="home.tech.env">Environment Management:</strong> <span data-i18n="home.tech.env_desc">UV package manager for Python dependencies</span></li>
                 </ul>
 
-                <h2>Research Focus</h2>
-                <p>
+                <h2 data-i18n="home.research">Research Focus</h2>
+                <p data-i18n="home.research_text">
                     This Bachelor Thesis explores several key areas in conversational AI and system architecture:
                 </p>
                 <ul style="margin-left: 20px; margin-bottom: 20px;">
-                    <li>Integration patterns for large language models in web applications</li>
-                    <li>Skill-based chatbot architectures for specialized task handling</li>
-                    <li>User session management in conversational AI systems</li>
-                    <li>Real-time communication protocols for chat applications</li>
-                    <li>Database design for conversational AI data persistence</li>
-                    <li>Scalable backend patterns for AI-powered applications</li>
+                    <li data-i18n="home.research.llm">Integration patterns for large language models in web applications</li>
+                    <li data-i18n="home.research.skills">Skill-based chatbot architectures for specialized task handling</li>
+                    <li data-i18n="home.research.sessions">User session management in conversational AI systems</li>
+                    <li data-i18n="home.research.realtime">Real-time communication protocols for chat applications</li>
+                    <li data-i18n="home.research.db">Database design for conversational AI data persistence</li>
+                    <li data-i18n="home.research.scale">Scalable backend patterns for AI-powered applications</li>
                 </ul>
 
                 <div class="text-center mt-20">
-                    <a href="chat.html" class="btn">Try the Chat Demo</a>
-                    <a href="documentation.html" class="btn btn-secondary">View API Documentation</a>
+                    <a href="chat.html" class="btn" data-i18n="home.try_chat">Try the Chat Demo</a>
+                    <a href="documentation.html" class="btn btn-secondary" data-i18n="home.view_docs">View API Documentation</a>
                 </div>
             </div>
         </div>
@@ -128,10 +128,13 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+            <p data-i18n="footer.rights">&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
         </div>
     </footer>
-    <script src="js/api.js"></script>
+    <script src="js/config.js?v=1.0.0"></script>
+    <script src="js/translations.js?v=1.0.0"></script>
+    <script src="js/i18n.js?v=1.0.0"></script>
+    <script src="js/api.js?v=1.0.0"></script>
     <script>
         // Update admin link visibility on page load
         if (typeof api !== 'undefined') {

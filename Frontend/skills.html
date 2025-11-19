@@ -580,25 +580,25 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">AI Chatbot System</a>
+            <a href="index.html" class="logo" data-i18n="nav.home">AI Chatbot System</a>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a href="documentation.html" class="nav-link">API Docs</a>
+                    <a href="documentation.html" class="nav-link" data-i18n="nav.docs">API Docs</a>
                 </li>
                 <li class="nav-item">
-                    <a href="user.html" class="nav-link">Account</a>
+                    <a href="user.html" class="nav-link" data-i18n="nav.account">Account</a>
                 </li>
                 <li class="nav-item">
-                    <a href="skills.html" class="nav-link active">Skills</a>
+                    <a href="skills.html" class="nav-link active" data-i18n="nav.skills">Skills</a>
                 </li>
                 <li class="nav-item">
-                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                    <a href="chat.html" class="nav-link" data-i18n="nav.chat">Chat Demo</a>
                 </li>
                 <li class="nav-item" id="adminNavItem" style="display: none;">
-                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                    <a href="admin.html" class="nav-link" data-i18n="nav.admin">Admin Panel</a>
                 </li>
             </ul>
         </div>
@@ -606,7 +606,7 @@
 
     <!-- Quick Start Note -->
     <div class="demo-note">
-        <strong>Skills Analysis:</strong> View and analyze extracted skills from chat conversations across different skill systems.
+        <strong data-i18n="skills.title">Skills Analysis:</strong> <span data-i18n="skills.demo_note">View and analyze extracted skills from chat conversations across different skill systems.</span>
     </div>
 
     <!-- Main Skills Layout -->
@@ -621,34 +621,10 @@
                 </select>
             </div>
             
-            <div class="sessions-header">Chat Sessions</div>
+            <div class="sessions-header" data-i18n="skills.sessions_header">Chat Sessions</div>
             
             <div class="sessions-list" id="sessionsList">
-                <!-- Sample Sessions with skill counts -->
-                <button class="session-item active" data-session-id="1">
-                    <div class="session-title">Welcome Chat</div>
-                    <div class="session-skills-count">3 skills extracted</div>
-                </button>
-                
-                <button class="session-item" data-session-id="2">
-                    <div class="session-title">Python Questions</div>
-                    <div class="session-skills-count">8 skills extracted</div>
-                </button>
-                
-                <button class="session-item" data-session-id="3">
-                    <div class="session-title">Project Planning</div>
-                    <div class="session-skills-count">12 skills extracted</div>
-                </button>
-                
-                <button class="session-item" data-session-id="4">
-                    <div class="session-title">API Documentation</div>
-                    <div class="session-skills-count">5 skills extracted</div>
-                </button>
-                
-                <button class="session-item" data-session-id="5">
-                    <div class="session-title">Data Analysis</div>
-                    <div class="session-skills-count">15 skills extracted</div>
-                </button>
+                <!-- Sessions will be populated dynamically -->
             </div>
             
             <div class="user-info">
@@ -661,132 +637,51 @@
         <div class="skills-main">
             <div class="skills-header">
                 <div>
-                    <h1 class="skills-title" id="skillsTitle">Welcome Chat - ESCO Skills</h1>
-                    <div class="skills-meta" id="skillsMeta">Session from 2024-01-15</div>
+                    <h1 class="skills-title" id="skillsTitle">Skills Analysis</h1>
+                    <div class="skills-meta" id="skillsMeta">Select a session</div>
                 </div>
                 <div class="skills-actions">
-                    <button class="action-btn" id="exportSkillsBtn">Export</button>
-                    <button class="action-btn" id="refreshSkillsBtn">Refresh</button>
+                    <button class="action-btn" id="exportSkillsBtn" data-i18n="chat.export">Export</button>
+                    <button class="action-btn" id="refreshSkillsBtn" data-i18n="skills.refresh">Refresh</button>
                 </div>
             </div>
             
             <div class="filter-section">
                 <div class="filter-group">
-                    <span class="filter-label">Language:</span>
-                    <select class="filter-select" id="languageFilter">
-                        <option value="en">English</option>
-                        <option value="de">German</option>
-                        <option value="fr">French</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <span class="filter-label">Sort by:</span>
+                    <span class="filter-label" data-i18n="skills.filter_sort">Sort by:</span>
                     <select class="filter-select" id="sortFilter">
-                        <option value="title">Title</option>
-                        <option value="relevance">Relevance</option>
-                        <option value="extracted">Date Extracted</option>
+                        <option value="title" data-i18n="skills.sort_title">Title</option>
+                        <option value="relevance" data-i18n="skills.sort_relevance">Relevance</option>
+                        <option value="extracted" data-i18n="skills.sort_extracted">Date Extracted</option>
                     </select>
                 </div>
             </div>
             
             <div class="skills-stats">
                 <div class="stats-item">
-                    <span>Total Skills:</span>
-                    <span class="stats-number" id="totalSkills">3</span>
+                    <span data-i18n="skills.stats_total">Total Skills:</span>
+                    <span class="stats-number" id="totalSkills">0</span>
                 </div>
                 <div class="stats-item">
-                    <span>Skill System:</span>
+                    <span data-i18n="skills.stats_system">Skill System:</span>
                     <span class="stats-number" id="currentSkillSystem">ESCO</span>
                 </div>
                 <div class="stats-item">
-                    <span>Last Updated:</span>
-                    <span class="stats-number" id="lastUpdated">Just now</span>
+                    <span data-i18n="skills.stats_updated">Last Updated:</span>
+                    <span class="stats-number" id="lastUpdated">-</span>
                 </div>
             </div>
             
             <div class="skills-content" id="skillsContent">
                 <!-- Skills Grid -->
-                <div class="skills-grid" id="skillsGrid">
-                    <!-- Sample ESCO Skills -->
-                    <div class="skill-card">
-                        <div class="skill-header">
-                            <h3 class="skill-title">Python Programming</h3>
-                            <span class="skill-system-badge">ESCO</span>
-                        </div>
-                        <div class="skill-description">
-                            The ability to write, debug, and maintain Python code for various applications including web development, data analysis, and automation.
-                        </div>
-                        <div class="skill-meta">
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">URI:</span>
-                                <a href="#" class="skill-uri">http://data.europa.eu/esco/skill/python-programming</a>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Language:</span>
-                                <span>English</span>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Extracted from:</span>
-                                <span>Message #5</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="skill-card">
-                        <div class="skill-header">
-                            <h3 class="skill-title">API Development</h3>
-                            <span class="skill-system-badge">ESCO</span>
-                        </div>
-                        <div class="skill-description">
-                            Design and implement Application Programming Interfaces (APIs) for web services and applications, including RESTful APIs and documentation.
-                        </div>
-                        <div class="skill-meta">
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">URI:</span>
-                                <a href="#" class="skill-uri">http://data.europa.eu/esco/skill/api-development</a>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Language:</span>
-                                <span>English</span>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Extracted from:</span>
-                                <span>Message #12</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="skill-card">
-                        <div class="skill-header">
-                            <h3 class="skill-title">Problem Solving</h3>
-                            <span class="skill-system-badge">ESCO</span>
-                        </div>
-                        <div class="skill-description">
-                            Identify problems, analyze information, and develop solutions through logical thinking and creative approaches.
-                        </div>
-                        <div class="skill-meta">
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">URI:</span>
-                                <a href="#" class="skill-uri">http://data.europa.eu/esco/skill/problem-solving</a>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Language:</span>
-                                <span>English</span>
-                            </div>
-                            <div class="skill-meta-item">
-                                <span class="skill-meta-label">Extracted from:</span>
-                                <span>Message #8</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="skills-grid" id="skillsGrid"></div>
                 
-                <!-- Empty State (hidden by default) -->
+                <!-- Empty State -->
                 <div class="empty-state" id="emptyState" style="display: none;">
                     <div class="empty-state-icon">🔍</div>
-                    <h3>No Skills Found</h3>
-                    <p>No skills have been extracted from this chat session yet.</p>
-                    <p>Start a conversation to see extracted skills appear here.</p>
+                    <h3 data-i18n="skills.empty_title">No Skills Found</h3>
+                    <p data-i18n="skills.empty_desc">No skills have been extracted from this chat session yet.</p>
+                    <p data-i18n="skills.empty_action">Start a conversation to see extracted skills appear here.</p>
                 </div>
             </div>
         </div>
@@ -795,7 +690,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+            <p data-i18n="footer.rights">&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
         </div>
     </footer>
 
@@ -803,24 +698,26 @@
     <div id="editSkillModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeModalBtn">&times;</span>
-            <h2 id="modalTitle">Edit Skill</h2>
+            <h2 id="modalTitle" data-i18n="admin.modal.edit_title">Edit Skill</h2>
             <div id="modalBody">
                 <!-- Dynamic content will be inserted here -->
             </div>
             <div class="modal-footer">
-                <button id="saveSkillBtn" class="action-btn" style="background: #3498db; color: white;">Save Changes</button>
+                <button id="saveSkillBtn" class="action-btn" style="background: #3498db; color: white;" data-i18n="admin.save">Save Changes</button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="js/config.js?v=1.0.0"></script>
+    <script src="js/translations.js?v=1.0.0"></script>
+    <script src="js/i18n.js?v=1.0.0"></script>
     <script src="js/api.js?v=1.0.0"></script>
     <script>
         // State management
         let currentSessionId = null;
         let currentSkillSystem = 'ESCO';
-        let currentLanguage = 'en';
+        let currentLanguage = typeof I18n !== 'undefined' ? I18n.currentLanguage : 'en';
         let userSessions = [];
         let currentSessionSkills = [];
         let currentSearchResults = [];
@@ -836,7 +733,6 @@
         const skillsGrid = document.getElementById('skillsGrid');
         const skillsContent = document.getElementById('skillsContent');
         const emptyState = document.getElementById('emptyState');
-        const languageFilter = document.getElementById('languageFilter');
         const sortFilter = document.getElementById('sortFilter');
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
@@ -848,6 +744,12 @@
         const modalBody = document.getElementById('modalBody');
         const modalTitle = document.getElementById('modalTitle');
         let currentEditingSkill = null;
+
+        // Helper for translations in JS
+        function t(key) {
+            if (window.t) return window.t(key);
+            return key;
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -899,8 +801,22 @@
 
         function setupEventListeners() {
             skillSystemSelector.addEventListener('change', handleSkillSystemChange);
-            languageFilter.addEventListener('change', handleLanguageChange);
             sortFilter.addEventListener('change', handleSortChange);
+            
+            // Listen for global language changes
+            window.addEventListener('languageChanged', (e) => {
+                currentLanguage = e.detail.language;
+                if (currentSessionId) {
+                    selectSession(currentSessionId); // Reload session to update text
+                    loadUserSessions(); // Update session list text
+                }
+                
+                // Update sort options text
+                Array.from(sortFilter.options).forEach(option => {
+                    const key = option.getAttribute('data-i18n');
+                    if (key) option.textContent = t(key);
+                });
+            });
             
             // Action buttons
             document.getElementById('exportSkillsBtn').addEventListener('click', exportSkills);
@@ -951,7 +867,7 @@
                     sessionsList.innerHTML = `
                         <div style="padding: 20px; text-align: center; color: #95a5a6;">
                             <p>No chat sessions found.</p>
-                            <a href="chat.html" style="color: #3498db;">Start chatting</a>
+                            <a href="chat.html" style="color: #3498db;">${t('chat.new_chat')}</a>
                         </div>
                     `;
                     showEmptyState();
@@ -962,7 +878,7 @@
                 
                 // Only auto-select if no URL parameters are present
                 const urlParams = new URLSearchParams(window.location.search);
-                if (!urlParams.get('session_id') && userSessions.length > 0) {
+                if (!urlParams.get('session_id') && userSessions.length > 0 && !currentSessionId) {
                     selectSession(userSessions[0].session_id);
                 }
                 
@@ -984,7 +900,7 @@
                             data-session-id="${session.session_id}"
                             onclick="selectSession(${session.session_id})">
                         <div class="session-title">${session.session_name || 'Untitled Session'}</div>
-                        <div class="session-skills-count">${customCount} skills extracted</div>
+                        <div class="session-skills-count">${customCount} ${t('common.skills_extracted')}</div>
                     </button>
                 `;
             }).join('');
@@ -1007,7 +923,7 @@
             const session = userSessions.find(s => s.session_id === sessionId);
             if (session) {
                 skillsTitle.textContent = `${session.session_name || 'Untitled Session'} - ${currentSkillSystem} Skills`;
-                skillsMeta.textContent = `Session from ${UIUtils.formatDate(session.created_at)}`;
+                skillsMeta.textContent = `${t('common.session_from')} ${UIUtils.formatDate(session.created_at)}`;
             }
 
             // Load skills for this session
@@ -1190,13 +1106,6 @@
                     }, 100);
                 }
             });
-        }
-
-        function handleLanguageChange() {
-            currentLanguage = languageFilter.value;
-            if (currentSessionId) {
-                loadSessionSkills();
-            }
         }
 
         function handleSortChange() {

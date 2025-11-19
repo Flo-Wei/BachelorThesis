@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlmodel import Session
 import logging
 
@@ -47,13 +47,20 @@ def get_esco_database_handler() -> ESCODatabase:
 async def chat_with_user(
     user_id: int,
     chat_request: ChatRequest,
+    accept_language: str = Header(default="en"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db_session_dependency),
     llm: BaseLLM = Depends(get_llm)
 ):
     """Process a chat message for a user."""
     logger.debug(f"Starting chat request for user_id={user_id}, current_user={current_user.user_id}, "
-                f"session_id={chat_request.session_id}, message_length={len(chat_request.message)}")
+                f"session_id={chat_request.session_id}, message_length={len(chat_request.message)}, "
+                f"accept_language={accept_language}")
+    
+    # Map language code to full name
+    language_map = {"de": "German", "en": "English"}
+    lang_code = accept_language.split(",")[0].split("-")[0]
+    language = language_map.get(lang_code, "English")
     
     # Check if user is chatting as themselves
     if user_id != current_user.user_id:
@@ -101,10 +108,11 @@ async def chat_with_user(
         logger.debug(f"User message added with ID: {user_message.message_id}")
         
         # Get LLM response (this will automatically save the assistant message to the database)
-        logger.debug(f"Requesting LLM response for session {session.session_id}")
+        logger.debug(f"Requesting LLM response for session {session.session_id} in language {language}")
         assistant_message = llm.chat(
             chat_session=session,
-            db_session=db
+            db_session=db,
+            language=language
         )
         logger.debug(f"LLM response received: message_id={assistant_message.message_id}, "
                     f"content_length={len(assistant_message.message_content)}, "

@@ -38,6 +38,7 @@
         
         .api-link.redoc:hover {
             background: #c0392b;
+            color: white;
         }
         
         .endpoint-preview {
@@ -81,25 +82,25 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">AI Chatbot System</a>
+            <a href="index.html" class="logo" data-i18n="nav.home">AI Chatbot System</a>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a href="documentation.html" class="nav-link active">API Docs</a>
+                    <a href="documentation.html" class="nav-link active" data-i18n="nav.docs">API Docs</a>
                 </li>
                 <li class="nav-item">
-                    <a href="user.html" class="nav-link">Account</a>
+                    <a href="user.html" class="nav-link" data-i18n="nav.account">Account</a>
                 </li>
                 <li class="nav-item">
-                    <a href="skills.html" class="nav-link">Skills</a>
+                    <a href="skills.html" class="nav-link" data-i18n="nav.skills">Skills</a>
                 </li>
                 <li class="nav-item">
-                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                    <a href="chat.html" class="nav-link" data-i18n="nav.chat">Chat Demo</a>
                 </li>
                 <li class="nav-item" id="adminNavItem" style="display: none;">
-                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                    <a href="admin.html" class="nav-link" data-i18n="nav.admin">Admin Panel</a>
                 </li>
             </ul>
         </div>
@@ -109,39 +110,39 @@
     <div class="container">
         <div class="main-content">
             <div class="content-section">
-                <h1>API Documentation</h1>
+                <h1 data-i18n="docs.title">API Documentation</h1>
                 
                 <div class="api-card">
-                    <h2>🚀 Interactive API Documentation</h2>
-                    <p>
+                    <h2 data-i18n="docs.interactive_title">🚀 Interactive API Documentation</h2>
+                    <p data-i18n="docs.interactive_desc">
                         The Bachelor Thesis Chatbot API provides comprehensive documentation through FastAPI's 
                         automatic documentation generation. Choose your preferred documentation interface:
                     </p>
                     
                     <div style="margin: 20px 0;">
                         <span class="status-indicator" id="apiStatus"></span>
-                        <span id="apiStatusText">Checking API status...</span>
+                        <span id="apiStatusText" data-i18n="docs.status_checking">Checking API status...</span>
                     </div>
                     
-                    <a href="http://localhost:8000/docs" target="_blank" class="api-link">
+                    <a href="http://localhost:8000/docs" target="_blank" class="api-link" data-i18n="docs.swagger">
                         📖 Swagger UI Documentation
                     </a>
-                    <a href="http://localhost:8000/redoc" target="_blank" class="api-link redoc">
+                    <a href="http://localhost:8000/redoc" target="_blank" class="api-link redoc" data-i18n="docs.redoc">
                         📋 ReDoc Documentation
                     </a>
                 </div>
 
                 <div class="api-card">
-                    <h2>📊 API Overview</h2>
-                    <p><strong>API Title:</strong> Bachelor Thesis Chatbot API</p>
-                    <p><strong>Version:</strong> 1.0.0</p>
-                    <p><strong>Base URL:</strong> <code>http://localhost:8000</code></p>
-                    <p><strong>Description:</strong> API for skill-extraction chatbot with database integration</p>
+                    <h2 data-i18n="docs.api_overview">📊 API Overview</h2>
+                    <p><strong data-i18n="docs.api_title">API Title:</strong> Bachelor Thesis Chatbot API</p>
+                    <p><strong data-i18n="docs.version">Version:</strong> 1.0.0</p>
+                    <p><strong data-i18n="docs.base_url">Base URL:</strong> <code>http://localhost:8000</code></p>
+                    <p><strong data-i18n="docs.description">Description:</strong> <span data-i18n="docs.desc_text">API for skill-extraction chatbot with database integration</span></p>
                 </div>
 
                 <div class="api-card">
-                    <h2>🔗 Key Endpoints Preview</h2>
-                    <p>Here are some of the main API endpoints available:</p>
+                    <h2 data-i18n="docs.endpoints_preview">🔗 Key Endpoints Preview</h2>
+                    <p data-i18n="docs.endpoints_desc">Here are some of the main API endpoints available:</p>
                     
                     <div class="endpoint-preview">
                         <span class="method post">POST</span><strong>/api/users/register</strong><br>
@@ -180,31 +181,31 @@
                 </div>
 
                 <div class="api-card">
-                    <h2>🛠️ Getting Started</h2>
-                    <p>To explore the API documentation:</p>
+                    <h2 data-i18n="docs.getting_started">🛠️ Getting Started</h2>
+                    <p data-i18n="docs.getting_started_desc">To explore the API documentation:</p>
                     <ol style="margin-left: 20px;">
-                        <li>Ensure the backend server is running: <code>uv run python app.py</code></li>
-                        <li>Click on one of the documentation links above</li>
-                        <li>Use the interactive interface to test API endpoints</li>
-                        <li>View request/response schemas and examples</li>
+                        <li data-i18n="docs.step_1">Ensure the backend server is running: <code>uv run python app.py</code></li>
+                        <li data-i18n="docs.step_2">Click on one of the documentation links above</li>
+                        <li data-i18n="docs.step_3">Use the interactive interface to test API endpoints</li>
+                        <li data-i18n="docs.step_4">View request/response schemas and examples</li>
                     </ol>
                     
-                    <h3>📝 Notes</h3>
+                    <h3 data-i18n="docs.notes">📝 Notes</h3>
                     <ul style="margin-left: 20px;">
-                        <li>Swagger UI provides an interactive testing interface</li>
-                        <li>ReDoc offers a clean, readable documentation format</li>
-                        <li>Both interfaces show the same API information in different formats</li>
-                        <li>All endpoints include detailed schemas and examples</li>
+                        <li data-i18n="docs.note_swagger">Swagger UI provides an interactive testing interface</li>
+                        <li data-i18n="docs.note_redoc">ReDoc offers a clean, readable documentation format</li>
+                        <li data-i18n="docs.note_formats">Both interfaces show the same API information in different formats</li>
+                        <li data-i18n="docs.note_schemas">All endpoints include detailed schemas and examples</li>
                     </ul>
                 </div>
 
                 <div class="api-card">
-                    <h2>🔧 Development Tools</h2>
-                    <p>Additional development resources:</p>
+                    <h2 data-i18n="docs.dev_tools">🔧 Development Tools</h2>
+                    <p data-i18n="docs.dev_tools_desc">Additional development resources:</p>
                     <ul style="margin-left: 20px;">
-                        <li><strong>OpenAPI Schema:</strong> <a href="/openapi.json" target="_blank">API Schema</a></li>
-                        <li><strong>Health Check:</strong> Available through the API endpoints</li>
-                        <li><strong>WebSocket Testing:</strong> Use the Chat Demo page for real-time testing</li>
+                        <li><strong data-i18n="docs.schema">OpenAPI Schema:</strong> <a href="/openapi.json" target="_blank">API Schema</a></li>
+                        <li><strong data-i18n="docs.health">Health Check:</strong> <span data-i18n="docs.health_desc">Available through the API endpoints</span></li>
+                        <li><strong data-i18n="docs.ws_test">WebSocket Testing:</strong> <span data-i18n="docs.ws_test_desc">Use the Chat Demo page for real-time testing</span></li>
                     </ul>
                 </div>
             </div>
@@ -214,12 +215,14 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+            <p data-i18n="footer.rights">&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
         </div>
     </footer>
 
     <!-- Scripts -->
     <script src="js/config.js?v=1.0.0"></script>
+    <script src="js/translations.js?v=1.0.0"></script>
+    <script src="js/i18n.js?v=1.0.0"></script>
     <script src="js/api.js?v=1.0.0"></script>
     <script>
         // API status check using our API client
@@ -230,10 +233,19 @@
             try {
                 await api.healthCheck();
                 statusIndicator.className = 'status-indicator status-online';
-                statusText.textContent = 'API Server Online';
+                // Use translation function if available
+                if (window.t) {
+                    statusText.textContent = window.t('docs.status_online');
+                } else {
+                    statusText.textContent = 'API Server Online';
+                }
             } catch (error) {
                 statusIndicator.className = 'status-indicator status-offline';
-                statusText.textContent = 'API Server Offline - Start with: uv run python app.py';
+                if (window.t) {
+                    statusText.textContent = window.t('docs.status_offline');
+                } else {
+                    statusText.textContent = 'API Server Offline - Start with: uv run python app.py';
+                }
             }
         }
         
@@ -247,6 +259,9 @@
         if (typeof api !== 'undefined') {
             api.updateAdminLinkVisibility();
         }
+        
+        // Re-check status on language change to update text
+        window.addEventListener('languageChanged', checkApiStatus);
     </script>
 </body>
 </html>

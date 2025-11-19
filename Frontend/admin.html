@@ -311,25 +311,25 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">AI Chatbot System</a>
+            <a href="index.html" class="logo" data-i18n="nav.home">AI Chatbot System</a>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a href="documentation.html" class="nav-link">API Docs</a>
+                    <a href="documentation.html" class="nav-link" data-i18n="nav.docs">API Docs</a>
                 </li>
                 <li class="nav-item">
-                    <a href="user.html" class="nav-link">Account</a>
+                    <a href="user.html" class="nav-link" data-i18n="nav.account">Account</a>
                 </li>
                 <li class="nav-item">
-                    <a href="skills.html" class="nav-link">Skills</a>
+                    <a href="skills.html" class="nav-link" data-i18n="nav.skills">Skills</a>
                 </li>
                 <li class="nav-item">
-                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                    <a href="chat.html" class="nav-link" data-i18n="nav.chat">Chat Demo</a>
                 </li>
                 <li class="nav-item" id="adminNavItem" style="display: none;">
-                    <a href="admin.html" class="nav-link active">Admin Panel</a>
+                    <a href="admin.html" class="nav-link active" data-i18n="nav.admin">Admin Panel</a>
                 </li>
             </ul>
         </div>
@@ -339,8 +339,8 @@
         <!-- Hero Section -->
         <section class="admin-hero">
             <div class="admin-container-wrapper">
-                <h1>Admin Panel</h1>
-                <p>Manage user accounts and platform administration</p>
+                <h1 data-i18n="admin.title">Admin Panel</h1>
+                <p data-i18n="admin.subtitle">Manage user accounts and platform administration</p>
             </div>
         </section>
 
@@ -351,13 +351,13 @@
                     <div id="messageContainer"></div>
                     
                     <div class="admin-actions">
-                        <h2 style="margin: 0; border: none; padding: 0;">User Management</h2>
-                        <button class="btn-refresh" onclick="loadUsers()">Refresh Users</button>
+                        <h2 style="margin: 0; border: none; padding: 0;" data-i18n="admin.user_management">User Management</h2>
+                        <button class="btn-refresh" onclick="loadUsers()" data-i18n="admin.refresh_users">Refresh Users</button>
                     </div>
                     
                     <div class="admin-table-container">
                         <div id="usersContainer">
-                            <div class="loading">Loading users...</div>
+                            <div class="loading" data-i18n="admin.loading_users">Loading users...</div>
                         </div>
                     </div>
                 </div>
@@ -370,27 +370,27 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="close" onclick="closeEditModal()">&times;</span>
-                <h2>Edit User</h2>
+                <h2 data-i18n="admin.modal.edit_title">Edit User</h2>
             </div>
             <form id="editUserForm">
                 <input type="hidden" id="editUserId">
                 <div class="form-group">
-                    <label class="form-label" for="editUsername">Username</label>
+                    <label class="form-label" for="editUsername" data-i18n="admin.table.username">Username</label>
                     <input type="text" id="editUsername" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="editEmail">Email</label>
+                    <label class="form-label" for="editEmail" data-i18n="admin.table.email">Email</label>
                     <input type="email" id="editEmail" class="form-input" required>
                 </div>
                 <div class="form-group">
                     <label class="form-checkbox">
                         <input type="checkbox" id="editIsAdmin">
-                        <span>Admin User</span>
+                        <span data-i18n="admin.table.admin">Admin User</span>
                     </label>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                    <button type="submit" class="btn" style="background: #e74c3c;">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()" data-i18n="admin.cancel">Cancel</button>
+                    <button type="submit" class="btn" style="background: #e74c3c;" data-i18n="admin.save">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -401,13 +401,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="close" onclick="closeDeleteModal()">&times;</span>
-                <h2>Delete User</h2>
+                <h2 data-i18n="admin.modal.delete_title">Delete User</h2>
             </div>
-            <p>Are you sure you want to delete user <strong id="deleteUserName"></strong>?</p>
-            <p style="color: #e74c3c; font-weight: bold; margin-top: 15px;">This action cannot be undone.</p>
+            <p><span data-i18n="admin.modal.delete_confirm">Are you sure you want to delete user</span> <strong id="deleteUserName"></strong>?</p>
+            <p style="color: #e74c3c; font-weight: bold; margin-top: 15px;" data-i18n="admin.modal.delete_warning">This action cannot be undone.</p>
             <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-                <button type="button" class="btn-delete" onclick="confirmDelete()">Delete User</button>
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()" data-i18n="admin.cancel">Cancel</button>
+                <button type="button" class="btn-delete" onclick="confirmDelete()" data-i18n="admin.confirm_delete">Delete User</button>
             </div>
         </div>
     </div>
@@ -415,11 +415,14 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
+            <p data-i18n="footer.rights">&copy; 2024 Bachelor Thesis Project - AI Chatbot System. All rights reserved.</p>
         </div>
     </footer>
 
-    <script src="js/api.js"></script>
+    <script src="js/config.js?v=1.0.0"></script>
+    <script src="js/translations.js?v=1.0.0"></script>
+    <script src="js/i18n.js?v=1.0.0"></script>
+    <script src="js/api.js?v=1.0.0"></script>
     <script>
         let currentDeleteUserId = null;
         
@@ -431,7 +434,7 @@
             }
             
             if (!api.isAdmin()) {
-                showMessage('Access denied. Admin privileges required.', 'error');
+                showMessage(t('admin.access_denied'), 'error');
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 2000);
@@ -447,6 +450,17 @@
             loadUsers();
         });
         
+        // Helper for translations in JS
+        function t(key) {
+            if (window.t) return window.t(key);
+            return key;
+        }
+
+        // Listen for language changes to reload dynamic content
+        window.addEventListener('languageChanged', () => {
+            loadUsers();
+        });
+        
         function showMessage(message, type) {
             const container = document.getElementById('messageContainer');
             const className = type === 'error' ? 'error-message' : 'success-message';
@@ -458,13 +472,13 @@
         
         async function loadUsers() {
             const container = document.getElementById('usersContainer');
-            container.innerHTML = '<div class="loading">Loading users...</div>';
+            container.innerHTML = `<div class="loading">${t('admin.loading_users')}</div>`;
             
             try {
                 const users = await api.listAllUsers();
                 renderUsersTable(users);
             } catch (error) {
-                container.innerHTML = `<div class="error-message">Error loading users: ${error.message}</div>`;
+                container.innerHTML = `<div class="error-message">${t('common.error')}: ${error.message}</div>`;
             }
         }
         
@@ -472,7 +486,7 @@
             const container = document.getElementById('usersContainer');
             
             if (users.length === 0) {
-                container.innerHTML = '<div class="loading">No users found.</div>';
+                container.innerHTML = `<div class="loading">${t('admin.no_users')}</div>`;
                 return;
             }
             
@@ -480,12 +494,12 @@
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Admin</th>
-                            <th>Created</th>
-                            <th>Actions</th>
+                            <th>${t('admin.table.id')}</th>
+                            <th>${t('admin.table.username')}</th>
+                            <th>${t('admin.table.email')}</th>
+                            <th>${t('admin.table.admin')}</th>
+                            <th>${t('admin.table.created')}</th>
+                            <th>${t('admin.table.actions')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -505,8 +519,8 @@
                         <td>${createdDate}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-edit" onclick="openEditModal(${user.user_id}, '${user.username}', '${user.email}', ${user.is_admin})">Edit</button>
-                                <button class="btn-delete" onclick="openDeleteModal(${user.user_id}, '${user.username}')">Delete</button>
+                                <button class="btn-edit" onclick="openEditModal(${user.user_id}, '${user.username}', '${user.email}', ${user.is_admin})">${t('admin.edit')}</button>
+                                <button class="btn-delete" onclick="openDeleteModal(${user.user_id}, '${user.username}')">${t('admin.delete')}</button>
                             </div>
                         </td>
                     </tr>
@@ -549,11 +563,11 @@
                     is_admin: isAdmin
                 });
                 
-                showMessage('User updated successfully!', 'success');
+                showMessage(t('admin.user_updated'), 'success');
                 closeEditModal();
                 loadUsers();
             } catch (error) {
-                showMessage(`Error updating user: ${error.message}`, 'error');
+                showMessage(`${t('common.error')}: ${error.message}`, 'error');
             }
         });
         
@@ -573,11 +587,11 @@
             
             try {
                 await api.deleteUser(currentDeleteUserId);
-                showMessage('User deleted successfully!', 'success');
+                showMessage(t('admin.user_deleted'), 'success');
                 closeDeleteModal();
                 loadUsers();
             } catch (error) {
-                showMessage(`Error deleting user: ${error.message}`, 'error');
+                showMessage(`${t('common.error')}: ${error.message}`, 'error');
             }
         }
         
@@ -595,4 +609,3 @@
     </script>
 </body>
 </html>
-

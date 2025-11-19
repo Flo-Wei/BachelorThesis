@@ -220,25 +220,25 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">AI Chatbot System</a>
+            <a href="#" class="logo" data-i18n="nav.home">AI Chatbot System</a>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a href="documentation.html" class="nav-link">API Docs</a>
+                    <a href="documentation.html" class="nav-link" data-i18n="nav.docs">API Docs</a>
                 </li>
                 <li class="nav-item">
-                    <a href="user.html" class="nav-link active">Account</a>
+                    <a href="user.html" class="nav-link active" data-i18n="nav.account">Account</a>
                 </li>
                 <li class="nav-item">
-                    <a href="skills.html" class="nav-link">Skills</a>
+                    <a href="skills.html" class="nav-link" data-i18n="nav.skills">Skills</a>
                 </li>
                 <li class="nav-item">
-                    <a href="chat.html" class="nav-link">Chat Demo</a>
+                    <a href="chat.html" class="nav-link" data-i18n="nav.chat">Chat Demo</a>
                 </li>
                 <li class="nav-item" id="adminNavItem" style="display: none;">
-                    <a href="admin.html" class="nav-link">Admin Panel</a>
+                    <a href="admin.html" class="nav-link" data-i18n="nav.admin">Admin Panel</a>
                 </li>
             </ul>
         </div>
@@ -253,8 +253,8 @@
         <!-- Authentication Section (shown when not logged in) -->
         <div id="authSection" class="auth-container">
             <div class="auth-header">
-                <h1 id="authTitle">Login to Your Account</h1>
-                <p>Access your chat sessions and profile</p>
+                <h1 id="authTitle" data-i18n="user.login_title">Login to Your Account</h1>
+                <p data-i18n="user.login_subtitle">Access your chat sessions and profile</p>
             </div>
             <div class="auth-content">
                 <div id="messageContainer"></div>
@@ -262,34 +262,34 @@
                 <!-- Login Form -->
                 <form id="loginForm" class="auth-form">
                     <div class="form-group">
-                        <label class="form-label" for="loginUsername">Username</label>
+                        <label class="form-label" for="loginUsername" data-i18n="user.username">Username</label>
                         <input type="text" id="loginUsername" class="form-input" required>
                     </div>
-                    <button type="submit" class="form-button">Login</button>
+                    <button type="submit" class="form-button" data-i18n="user.login_btn">Login</button>
                 </form>
                 
                 <!-- Registration Form -->
                 <form id="registerForm" class="auth-form hidden">
                     <div class="form-group">
-                        <label class="form-label" for="registerUsername">Username</label>
+                        <label class="form-label" for="registerUsername" data-i18n="user.username">Username</label>
                         <input type="text" id="registerUsername" class="form-input" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="registerEmail">Email</label>
+                        <label class="form-label" for="registerEmail" data-i18n="user.email">Email</label>
                         <input type="email" id="registerEmail" class="form-input" required>
                     </div>
                     <div class="form-group">
                         <label style="display: flex; align-items: center; cursor: pointer;">
                             <input type="checkbox" id="registerIsAdmin" style="margin-right: 8px; width: auto;">
-                            <span>Create as admin</span>
+                            <span data-i18n="user.admin_checkbox">Create as admin</span>
                         </label>
                     </div>
-                    <button type="submit" class="form-button">Create Account</button>
+                    <button type="submit" class="form-button" data-i18n="user.create_account_btn">Create Account</button>
                 </form>
                 
                 <div class="auth-switch">
-                    <span id="authSwitchText">Don't have an account?</span>
-                    <span id="authSwitchLink" class="auth-link">Register here</span>
+                    <span id="authSwitchText" data-i18n="user.no_account">Don't have an account?</span>
+                    <span id="authSwitchLink" class="auth-link" data-i18n="user.register_link">Register here</span>
                 </div>
             </div>
         </div>
@@ -297,18 +297,18 @@
         <!-- User Profile Section (shown when logged in) -->
         <div id="profileSection" class="user-profile hidden">
             <div class="profile-header">
-                <h1>Welcome back!</h1>
+                <h1 data-i18n="user.welcome_back">Welcome back!</h1>
                 <p id="userGreeting">Manage your profile and chat sessions</p>
             </div>
             <div class="profile-content">
-                <h2>Profile Information</h2>
+                <h2 data-i18n="user.profile_info">Profile Information</h2>
                 <div class="profile-info">
                     <div class="info-card">
-                        <div class="info-label">Username</div>
+                        <div class="info-label" data-i18n="user.username">Username</div>
                         <div class="info-value" id="profileUsername">-</div>
                     </div>
                     <div class="info-card">
-                        <div class="info-label">Email</div>
+                        <div class="info-label" data-i18n="user.email">Email</div>
                         <div class="info-value" id="profileEmail">-</div>
                     </div>
                     <div class="info-card">
@@ -316,19 +316,19 @@
                         <div class="info-value" id="profileUserId">-</div>
                     </div>
                     <div class="info-card">
-                        <div class="info-label">Member Since</div>
+                        <div class="info-label" data-i18n="user.member_since">Member Since</div>
                         <div class="info-value" id="profileCreatedAt">-</div>
                     </div>
                 </div>
                 
                 <div class="sessions-section">
-                    <h2>Your Chat Sessions</h2>
+                    <h2 data-i18n="user.your_sessions">Your Chat Sessions</h2>
                     <div id="sessionsContainer">
-                        <div class="loading">Loading your chat sessions...</div>
+                        <div class="loading" data-i18n="common.loading">Loading your chat sessions...</div>
                     </div>
                 </div>
                 
-                <button id="logoutBtn" class="form-button logout-btn">Logout</button>
+                <button id="logoutBtn" class="form-button logout-btn" data-i18n="user.logout">Logout</button>
             </div>
         </div>
     </div>
@@ -342,6 +342,8 @@
 
     <!-- Scripts -->
     <script src="js/config.js?v=1.0.0"></script>
+    <script src="js/translations.js?v=1.0.0"></script>
+    <script src="js/i18n.js?v=1.0.0"></script>
     <script src="js/api.js?v=1.0.0"></script>
     <script>
         // State management
@@ -365,6 +367,26 @@
         const userGreeting = document.getElementById('userGreeting');
         const sessionsContainer = document.getElementById('sessionsContainer');
         const logoutBtn = document.getElementById('logoutBtn');
+
+        // Helper for translations in JS
+        function t(key) {
+            if (window.t) return window.t(key);
+            return key;
+        }
+
+        // Listen for language changes to reload dynamic content
+        window.addEventListener('languageChanged', () => {
+            if (api.isAuthenticated()) {
+                loadUserProfile(); // Reload profile to update date formats if changed (less likely)
+                loadUserSessions(); // Reload sessions to update "Created" and "extracted" text
+            } else {
+                // Update Auth form dynamic text
+                toggleAuthMode(); // Re-apply current mode text
+                // toggleAuthMode toggles the state, so we call it twice to refresh or just manually set text?
+                // toggleAuthMode toggles `isLoginMode`. Better to just set text based on current `isLoginMode`.
+                updateAuthText();
+            }
+        });
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -396,22 +418,29 @@
 
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
+            updateAuthText();
             
             if (isLoginMode) {
-                authTitle.textContent = 'Login to Your Account';
                 loginForm.classList.remove('hidden');
                 registerForm.classList.add('hidden');
-                authSwitchText.textContent = "Don't have an account?";
-                authSwitchLink.textContent = 'Register here';
             } else {
-                authTitle.textContent = 'Create New Account';
                 loginForm.classList.add('hidden');
                 registerForm.classList.remove('hidden');
-                authSwitchText.textContent = 'Already have an account?';
-                authSwitchLink.textContent = 'Login here';
             }
             
             clearMessages();
+        }
+
+        function updateAuthText() {
+            if (isLoginMode) {
+                authTitle.textContent = t('user.login_title');
+                authSwitchText.textContent = t('user.no_account');
+                authSwitchLink.textContent = t('user.register_link');
+            } else {
+                authTitle.textContent = t('user.register_title');
+                authSwitchText.textContent = t('user.have_account');
+                authSwitchLink.textContent = t('user.login_link');
+            }
         }
 
         async function handleLogin(e) {
@@ -424,9 +453,9 @@
             }
 
             try {
-                showMessage('Logging in...', 'info');
+                showMessage(t('common.loading'), 'info');
                 await api.loginUser(username);
-                showMessage('Login successful!', 'success');
+                showMessage(t('common.success'), 'success');
                 
                 // Update admin link visibility immediately after login
                 if (typeof api !== 'undefined') {
@@ -456,14 +485,16 @@
             }
 
             try {
-                showMessage('Creating account...', 'info');
+                showMessage(t('common.loading'), 'info');
                 const newUser = await api.registerUser(username, email, isAdmin);
-                showMessage('Account created successfully! You can now login.', 'success');
+                showMessage(t('common.success'), 'success');
                 
                 // Note: User needs to login to see admin link, but registration was successful
                 
                 // Switch to login mode
                 document.getElementById('loginUsername').value = username;
+                // Switch manually to login mode
+                isLoginMode = false; // Will be flipped to true by toggleAuthMode
                 toggleAuthMode();
                 
             } catch (error) {
@@ -498,7 +529,7 @@
                 profileEmail.textContent = user.email;
                 profileUserId.textContent = user.user_id;
                 profileCreatedAt.textContent = UIUtils.formatDate(user.created_at);
-                userGreeting.textContent = `Welcome back, ${user.username}!`;
+                userGreeting.textContent = `${t('user.welcome_back')} ${user.username}`;
                 
             } catch (error) {
                 console.error('Error loading profile:', error);
@@ -516,8 +547,8 @@
                 if (sessions.length === 0) {
                     sessionsContainer.innerHTML = `
                         <div class="text-center" style="padding: 20px; color: #666;">
-                            <p>No chat sessions yet.</p>
-                            <a href="chat.html" class="btn">Start Your First Chat</a>
+                            <p>${t('skills.empty_desc')}</p>
+                            <a href="chat.html" class="btn">${t('chat.new_chat')}</a>
                         </div>
                     `;
                     return;
@@ -527,8 +558,8 @@
                     <div class="session-card">
                         <div class="session-name">${session.session_name || 'Untitled Session'}</div>
                         <div class="session-meta">
-                            Created: ${UIUtils.formatDate(session.created_at)} | 
-                            Skills: ${session.esco_skills.length} extracted
+                            ${t('common.created')} ${UIUtils.formatDate(session.created_at)} | 
+                            ${session.esco_skills.length} ${t('common.extracted')}
                         </div>
                     </div>
                 `).join('');

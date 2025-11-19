@@ -21,7 +21,8 @@ class BaseLLM(ABC):
     def chat(
         self, 
         chat_session: ChatSession,
-        db_session: Session
+        db_session: Session,
+        language: str = "English"
     ) -> ChatMessage:
         pass
     
@@ -55,13 +56,23 @@ class OpenAILLM(BaseLLM):
     def chat(
         self, 
         chat_session: ChatSession,
-        db_session: Session
+        db_session: Session,
+        language: str = "English"
     ) -> ChatMessage: 
 
         config = self.config.to_dict() if self.config else {}
+        
+        # Prepare messages and update system prompt with current language
+        messages = chat_session.to_openai_input()
+        
+        # Check if first message is system prompt and update it
+        # This ensures we always use the latest prompt version and correct language
+        if messages and messages[0]["role"] == "system":
+            messages[0]["content"] = get_prompt("interviewer").format(language=language)
+        
         response = self.client.responses.create(
             model=self.model_name,
-            input=chat_session.to_openai_input(),
+            input=messages,
             **config
         )
         
