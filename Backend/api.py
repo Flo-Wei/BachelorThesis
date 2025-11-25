@@ -10,7 +10,7 @@ from Backend.logging_config import setup_logging
 from Backend.database.init import init_database
 from Backend.classes.LLM import OpenAILLM
 from Backend.classes.Skill_Database_Handler import ESCODatabase
-from Backend.routers import users, sessions, chat, skills, utils
+from Backend.routers import users, sessions, chat, skills, utils, visualization
 
 # Set up logging
 setup_logging()
@@ -88,6 +88,7 @@ app.include_router(users.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 app.include_router(skills.router, prefix="/api")
+app.include_router(visualization.router, prefix="/api")
 app.include_router(utils.router, prefix="/api")
 
 # Mount static files directory to serve CSS, JS, HTML, and other static assets

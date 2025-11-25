@@ -59,7 +59,7 @@ class CustomSkillModel(SQLModel, table=True):
     @classmethod
     def from_pydantic(cls, skill: CustomSkill, session_id: int, origin_message_id: int) -> "CustomSkillModel":
         # Convert string type to SkillType enum
-        skill_type = SkillType(skill.type)
+        skill_type = SkillType(skill.type.lower().strip())
         return cls(
             session_id=session_id,
             origin_message_id=origin_message_id,

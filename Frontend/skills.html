@@ -641,12 +641,41 @@
                     <div class="skills-meta" id="skillsMeta">Select a session</div>
                 </div>
                 <div class="skills-actions">
+                     <div class="btn-group" role="group" style="display: flex; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-right: 10px;">
+                        <button type="button" class="action-btn active" id="viewListBtn" style="border-radius: 0; border: none; background: #3498db; color: white;">List</button>
+                        <button type="button" class="action-btn" id="viewVizBtn" style="border-radius: 0; border: none; background: #ecf0f1;">Visuals</button>
+                    </div>
                     <button class="action-btn" id="exportSkillsBtn" data-i18n="chat.export">Export</button>
                     <button class="action-btn" id="refreshSkillsBtn" data-i18n="skills.refresh">Refresh</button>
                 </div>
             </div>
             
-            <div class="filter-section">
+            <!-- Visualization Container -->
+            <div id="visualizationContainer" style="display: none; padding: 20px; border-bottom: 1px solid #e0e0e0; background: #fcfcfc;">
+                <h3 style="margin-top: 0; color: #2c3e50;">Visualizations</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <canvas id="donutChart"></canvas>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <canvas id="densityChart"></canvas>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                         <canvas id="sunburstChart"></canvas>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <h4 style="margin-top: 0;">Top Matching Occupations</h4>
+                    <div id="occupationList"></div>
+                </div>
+            </div>
+            
+            <div class="filter-section" id="filterSection">
                 <div class="filter-group">
                     <span class="filter-label" data-i18n="skills.filter_sort">Sort by:</span>
                     <select class="filter-select" id="sortFilter">
@@ -657,7 +686,7 @@
                 </div>
             </div>
             
-            <div class="skills-stats">
+            <div class="skills-stats" id="skillsStats">
                 <div class="stats-item">
                     <span data-i18n="skills.stats_total">Total Skills:</span>
                     <span class="stats-number" id="totalSkills">0</span>
@@ -709,10 +738,12 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/config.js?v=1.0.0"></script>
     <script src="js/translations.js?v=1.0.0"></script>
     <script src="js/i18n.js?v=1.0.0"></script>
     <script src="js/api.js?v=1.0.0"></script>
+    <script src="js/skills_viz.js"></script>
     <script>
         // State management
         let currentSessionId = null;
@@ -721,6 +752,7 @@
         let userSessions = [];
         let currentSessionSkills = [];
         let currentSearchResults = [];
+        let currentViewMode = 'list'; // 'list' or 'viz'
 
         // DOM elements
         const skillSystemSelector = document.getElementById('skillSystemSelector');
@@ -734,6 +766,11 @@
         const skillsContent = document.getElementById('skillsContent');
         const emptyState = document.getElementById('emptyState');
         const sortFilter = document.getElementById('sortFilter');
+        const filterSection = document.getElementById('filterSection');
+        const skillsStats = document.getElementById('skillsStats');
+        const visualizationContainer = document.getElementById('visualizationContainer');
+        const viewListBtn = document.getElementById('viewListBtn');
+        const viewVizBtn = document.getElementById('viewVizBtn');
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
         
@@ -821,6 +858,47 @@
             // Action buttons
             document.getElementById('exportSkillsBtn').addEventListener('click', exportSkills);
             document.getElementById('refreshSkillsBtn').addEventListener('click', refreshSkills);
+            
+            // View toggles
+            viewListBtn.addEventListener('click', () => switchView('list'));
+            viewVizBtn.addEventListener('click', () => switchView('viz'));
+        }
+
+        function switchView(mode) {
+            currentViewMode = mode;
+            
+            if (mode === 'list') {
+                viewListBtn.classList.add('active');
+                viewListBtn.style.background = '#3498db';
+                viewListBtn.style.color = 'white';
+                
+                viewVizBtn.classList.remove('active');
+                viewVizBtn.style.background = '#ecf0f1';
+                viewVizBtn.style.color = '#2c3e50';
+                
+                visualizationContainer.style.display = 'none';
+                skillsContent.style.display = 'block';
+                filterSection.style.display = 'flex';
+                skillsStats.style.display = 'flex';
+            } else {
+                viewVizBtn.classList.add('active');
+                viewVizBtn.style.background = '#3498db';
+                viewVizBtn.style.color = 'white';
+                
+                viewListBtn.classList.remove('active');
+                viewListBtn.style.background = '#ecf0f1';
+                viewListBtn.style.color = '#2c3e50';
+                
+                visualizationContainer.style.display = 'block';
+                skillsContent.style.display = 'none';
+                filterSection.style.display = 'none';
+                skillsStats.style.display = 'none'; // Hide stats in viz mode as charts show similar info? Or keep them? User asked for "switch".
+                
+                // Load viz if session selected
+                if (currentSessionId && typeof loadVisualizations === 'function') {
+                    loadVisualizations(currentSessionId, currentSkillSystem);
+                }
+            }
         }
 
         async function loadSkillSystems() {
@@ -928,6 +1006,14 @@
 
             // Load skills for this session
             await loadSessionSkills();
+            
+            // Load visualizations if in viz mode, otherwise just ensure container is correct
+            if (currentViewMode === 'viz') {
+                 if (typeof loadVisualizations === 'function') {
+                    loadVisualizations(sessionId, currentSkillSystem);
+                }
+            }
+            
             return Promise.resolve();
         }
 
@@ -1097,6 +1183,11 @@
             }
             
             loadSessionSkills().then(() => {
+                // Reload visualizations if in viz mode
+                if (currentViewMode === 'viz' && currentSessionId && typeof loadVisualizations === 'function') {
+                    loadVisualizations(currentSessionId, currentSkillSystem);
+                }
+                
                 // Check if we need to highlight a skill from URL params
                 const urlParams = new URLSearchParams(window.location.search);
                 const skillIdParam = urlParams.get('skill_id');
