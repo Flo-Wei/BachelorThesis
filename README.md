@@ -1,4 +1,4 @@
-# AI-Powered Skill Assessment Chatbot - Demo Version v1.0
+# AI-Powered Skill Assessment Chatbot - Demo Version v2.0
 
 ## Project Overview
 
@@ -10,7 +10,7 @@ In addition to the conversational functionality, the system will support persist
 
 The evaluation of the system will be conducted through qualitative testing using a small set of predefined demo personas, focusing on usability and whether the chatbot behaves as intended. This project contributes to the growing field of AI-assisted skill profiling and offers a novel, low-barrier approach to capturing informal and non-formal competencies in the volunteering sector.
 
-**⚠️ Note: This is currently a Demo Version v1.0 - a proof of concept implementation for academic research purposes.**
+**⚠️ Note: This is currently a Demo Version v2.0 - a proof of concept implementation for academic research purposes.**
 
 ## 🚀 Features
 
@@ -18,7 +18,9 @@ The evaluation of the system will be conducted through qualitative testing using
 - **Dual Competency Models**: Support for ESCO and Freiwilligenpass frameworks
 - **Skill Extraction**: Automatic identification and mapping of user competencies
 - **Persistent Storage**: Complete conversation history and skill profiles
-- **Web Interface**: Modern, responsive web application
+- **Web Interface**: Modern, responsive web application with **multilingual support**
+- **Admin Dashboard**: specialized interface for user management and system monitoring
+- **Advanced Visualization**: Interactive charts (Donut, Sunburst, Radar) for in-depth skill analysis
 - **JWT Authentication**: Secure user management and session handling
 - **Real-time Processing**: Immediate AI responses and skill extraction
 - **Export Functionality**: Multiple format options for skills data
@@ -35,6 +37,7 @@ graph TB
         ChatUI[Chat Interface]
         UserUI[User Management]
         SkillsUI[Skills Display]
+        AdminUI[Admin Dashboard]
     end
     
     %% API Gateway Layer
@@ -42,15 +45,17 @@ graph TB
         FastAPI[FastAPI Application<br/>Main Entry Point]
         CORS[CORS Middleware]
         Auth[Authentication<br/>JWT Tokens]
+        StaticFiles[Static Files<br/>Frontend Serving]
     end
     
     %% Router Layer
     subgraph "Router Layer"
-        UsersRouter[Users Router<br/>/users/*]
-        SessionsRouter[Sessions Router<br/>/sessions/*]
-        ChatRouter[Chat Router<br/>/chat/*]
-        SkillsRouter[Skills Router<br/>/skills/*]
-        UtilsRouter[Utils Router]
+        UsersRouter[Users Router<br/>/api/users/*]
+        SessionsRouter[Sessions Router<br/>/api/sessions/*]
+        ChatRouter[Chat Router<br/>/api/chat/*]
+        SkillsRouter[Skills Router<br/>/api/skills/*]
+        VizRouter[Visualization Router<br/>/api/visualizations/*]
+        UtilsRouter[Utils Router<br/>/api/*]
     end
     
     %% Business Logic Layer
@@ -59,6 +64,7 @@ graph TB
         SkillService[Skill Extraction<br/>& Mapping Service]
         ChatService[Chat Processing<br/>Service]
         UserService[User Management<br/>Service]
+        VizProcessor[Visualization<br/>Processor]
     end
     
     %% Data Layer
@@ -80,13 +86,17 @@ graph TB
     ChatUI --> ChatRouter
     UserUI --> UsersRouter
     SkillsUI --> SkillsRouter
+    SkillsUI --> VizRouter
+    AdminUI --> UsersRouter
     
     FastAPI --> CORS
     FastAPI --> Auth
+    FastAPI --> StaticFiles
     FastAPI --> UsersRouter
     FastAPI --> SessionsRouter
     FastAPI --> ChatRouter
     FastAPI --> SkillsRouter
+    FastAPI --> VizRouter
     FastAPI --> UtilsRouter
     
     UsersRouter --> UserService
@@ -95,10 +105,12 @@ graph TB
     ChatRouter --> LLMService
     ChatRouter --> SkillService
     SkillsRouter --> SkillService
+    VizRouter --> VizProcessor
     
     UserService --> UserModel
     ChatService --> ChatModels
     SkillService --> SkillModels
+    VizProcessor --> SkillModels
     
     UserModel --> Database
     ChatModels --> Database
@@ -119,84 +131,12 @@ graph TB
     classDef data fill:#fce4ec,stroke:#880e4f,stroke-width:2px
     classDef external fill:#f1f8e9,stroke:#33691e,stroke-width:2px
     
-    class UI,ChatUI,UserUI,SkillsUI frontend
-    class FastAPI,CORS,Auth api
-    class UsersRouter,SessionsRouter,ChatRouter,SkillsRouter,UtilsRouter router
-    class LLMService,SkillService,ChatService,UserService service
+    class UI,ChatUI,UserUI,SkillsUI,AdminUI frontend
+    class FastAPI,CORS,Auth,StaticFiles api
+    class UsersRouter,SessionsRouter,ChatRouter,SkillsRouter,VizRouter,UtilsRouter router
+    class LLMService,SkillService,ChatService,UserService,VizProcessor service
     class Database,UserModel,ChatModels,SkillModels data
     class OpenAI,ESCOAPI external
-```
-
-### Data Flow Diagram
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant F as Frontend
-    participant API as FastAPI
-    participant Auth as Auth Service
-    participant CR as Chat Router
-    participant LLM as LLM Service
-    participant Skill as Skill Service
-    participant DB as Database
-    participant OpenAI as OpenAI API
-    participant ESCO as ESCO API
-    
-    %% User Authentication
-    U->>F: Login with username
-    F->>API: POST /users/login
-    API->>Auth: Verify credentials
-    Auth->>DB: Query user
-    DB-->>Auth: User data
-    Auth-->>API: JWT token
-    API-->>F: Token response
-    F-->>U: Store token & redirect
-    
-    %% Chat Session Creation
-    U->>F: Start new chat
-    F->>API: POST /users/{id}/sessions
-    API->>Auth: Verify JWT token
-    Auth-->>API: User authenticated
-    API->>CR: Create session
-    CR->>DB: Save session
-    DB-->>CR: Session created
-    CR-->>API: Session response
-    API-->>F: Session data
-    F-->>U: Chat interface
-    
-    %% Chat Message Processing
-    U->>F: Send message
-    F->>API: POST /users/{id}/chat
-    API->>Auth: Verify JWT token
-    Auth-->>API: User authenticated
-    API->>CR: Process chat
-    CR->>DB: Save user message
-    DB-->>CR: Message saved
-    CR->>LLM: Generate response
-    LLM->>OpenAI: API call
-    OpenAI-->>LLM: AI response
-    LLM->>DB: Save AI message
-    DB-->>LLM: Message saved
-    
-    %% Skill Extraction
-    CR->>Skill: Extract skills
-    Skill->>LLM: Extract skills from message
-    LLM->>OpenAI: Skill extraction API call
-    OpenAI-->>LLM: Extracted skills
-    LLM-->>Skill: Skills list
-    Skill->>ESCO: Search matching skills
-    ESCO-->>Skill: Available skills
-    Skill->>LLM: Map skills
-    LLM->>OpenAI: Skill mapping API call
-    OpenAI-->>LLM: Mapped skills
-    LLM-->>Skill: Mapped skills
-    Skill->>DB: Save mapped skills
-    DB-->>Skill: Skills saved
-    
-    %% Response to User
-    CR-->>API: Chat response with skills
-    API-->>F: Response data
-    F-->>U: Display AI response & skills
 ```
 
 ### Component Interaction Diagram
@@ -207,55 +147,60 @@ flowchart LR
         A[User Input]
         B[Chat Display]
         C[Skills Visualization]
+        D[Admin Panel]
     end
     
     subgraph "API Layer"
-        D[FastAPI App]
-        E[Authentication]
-        F[Request Validation]
+        E[FastAPI App]
+        F[Authentication]
+        G[Request Validation]
+        H[Static File Serving]
     end
     
     subgraph "Business Logic"
-        G[Chat Processing]
-        H[LLM Integration]
-        I[Skill Extraction]
-        J[Skill Mapping]
+        I[Chat Processing]
+        J[LLM Integration]
+        K[Skill Extraction]
+        L[Skill Mapping]
+        M[Viz Processing]
     end
     
     subgraph "Data Storage"
-        K[User Data]
-        L[Chat Sessions]
-        M[Messages]
-        N[Skills]
+        N[User Data]
+        O[Chat Sessions]
+        P[Messages]
+        Q[Skills]
     end
     
     subgraph "External APIs"
-        O[OpenAI GPT]
-        P[ESCO Skills]
+        R[OpenAI GPT]
+        S[ESCO Skills]
     end
     
-    A --> D
+    A --> E
     D --> E
     E --> F
     F --> G
-    G --> H
-    H --> O
-    O --> H
-    H --> I
+    G --> I
     I --> J
-    J --> P
-    P --> J
+    J --> R
+    R --> J
+    J --> K
+    K --> L
+    L --> S
+    S --> L
     
-    G --> K
-    G --> L
-    G --> M
     I --> N
+    I --> O
+    I --> P
+    K --> Q
     
-    H --> M
-    J --> N
+    J --> P
+    L --> Q
     
-    B --> M
-    C --> N
+    B --> P
+    C --> M
+    M --> Q
 ```
 
 ## 👥 User Flow
@@ -284,7 +229,17 @@ flowchart TD
     
     %% Common Path After Authentication
     AccountCreated --> GenerateToken
-    GenerateToken --> Dashboard[User Dashboard]
+    GenerateToken --> CheckRole{Is Admin?}
+    
+    %% Admin Path
+    CheckRole -->|Yes| AdminDashboard[Admin Dashboard]
+    AdminDashboard --> AdminAction{Admin Action}
+    AdminAction -->|Manage Users| ManageUsers[User List & Edit]
+    AdminAction -->|System Stats| ViewStats[View System Stats]
+    AdminAction -->|User View| Dashboard
+    
+    %% Regular User Path
+    CheckRole -->|No| Dashboard[User Dashboard]
     
     %% Dashboard Options
     Dashboard --> DashboardChoice{What would you like to do?}
@@ -304,7 +259,8 @@ flowchart TD
     SkillsOverview --> SkillsBySession[View skills by session]
     SkillsBySession --> SelectSessionForSkills[Select session]
     SelectSessionForSkills --> DisplaySkills[Display extracted skills]
-    DisplaySkills --> BackToDashboard[Return to Dashboard]
+    DisplaySkills --> ViewCharts[View Interactive Charts]
+    ViewCharts --> BackToDashboard
     
     %% Profile Management
     DashboardChoice -->|Manage Profile| ProfileOptions{Profile action?}
@@ -370,283 +326,16 @@ flowchart TD
     classDef data fill:#55a3ff,stroke:#2d3436,stroke-width:2px,color:#fff
     classDef error fill:#fd79a8,stroke:#e84393,stroke-width:2px,color:#fff
     classDef success fill:#00b894,stroke:#00a085,stroke-width:2px,color:#fff
+    classDef admin fill:#a29bfe,stroke:#6c5ce7,stroke-width:2px,color:#fff
     
     class Start,EndChat,Logout startEnd
-    class Register,Login,EnterDetails,EnterCredentials,NewChat,EnterSessionName,ChatInterface,TypeMessage,SendMessage,AIProcessing,ExtractSkills,MapSkills,GenerateResponse,DisplayResponse,DisplaySkillsInChat,SaveSession,ViewSessions,SelectSession,SkillsOverview,SkillsBySession,SelectSessionForSkills,DisplaySkills,ShowProfile,EditProfile,SaveProfile,DeleteSession,RenameSession,UpdateSessionName process
-    class Landing,ValidateRegistration,ValidateLogin,ValidateMessage,DashboardChoice,ContinueChat,SessionAction,ProfileOptions,ConfirmDelete,ConfirmLogout decision
+    class Register,Login,EnterDetails,EnterCredentials,NewChat,EnterSessionName,ChatInterface,TypeMessage,SendMessage,AIProcessing,ExtractSkills,MapSkills,GenerateResponse,DisplayResponse,DisplaySkillsInChat,SaveSession,ViewSessions,SelectSession,SkillsOverview,SkillsBySession,SelectSessionForSkills,DisplaySkills,ShowProfile,EditProfile,SaveProfile,DeleteSession,RenameSession,UpdateSessionName,ViewCharts process
+    class Landing,ValidateRegistration,ValidateLogin,ValidateMessage,DashboardChoice,ContinueChat,SessionAction,ProfileOptions,ConfirmDelete,ConfirmLogout,CheckRole,AdminAction decision
     class Dashboard,AccountCreated,GenerateToken,ProfileUpdated,SessionSaved,SessionDeleted,NameUpdated data
     class ShowError,ShowLoginError,ShowMessageError error
     class ChatInterface,DisplayResponse,DisplaySkillsInChat success
+    class AdminDashboard,ManageUsers,ViewStats admin
 ```
-
-## 🏛️ System Design
-
-### Class Diagram
-
-```mermaid
-classDiagram
-    %% Database Models
-    class User {
-        +int user_id
-        +str username
-        +str email
-        +datetime created_at
-        +List~ChatSession~ chat_sessions
-    }
-    
-    class ChatSession {
-        +int session_id
-        +int user_id
-        +str session_name
-        +datetime created_at
-        +datetime updated_at
-        +User user
-        +List~ChatMessage~ chat_messages
-        +List~ESCOSkillModel~ esco_skills
-        +add_message(session, message)
-        +get_messages(role)
-        +get_last_message(role)
-        +get_total_usage()
-        +to_openai_input()
-    }
-    
-    class ChatMessage {
-        +int message_id
-        +int session_id
-        +MessageType role
-        +str message_content
-        +int usage
-        +str model
-        +datetime timestamp
-        +ChatSession chat_session
-        +List~ESCOSkillModel~ derived_skills_esco
-        +from_openai_message(session, message)
-    }
-    
-    class ESCOSkillModel {
-        +int id
-        +int session_id
-        +int origin_message_id
-        +SkillSystem skill_system
-        +str uri
-        +str title
-        +str reference_language
-        +Dict~str,str~ preferred_label
-        +Dict~str,str~ description
-        +Dict~str,Any~ links
-        +ChatSession chat_session
-        +ChatMessage origin_message
-        +get_preferred_label(language)
-        +get_description(language)
-        +from_pydantic(skill)
-    }
-    
-    class ChatSkillBase {
-        +int id
-        +int session_id
-        +int origin_message_id
-        +SkillSystem skill_system
-        +from_pydantic(skill)
-    }
-    
-    %% Enums
-    class MessageType {
-        <<enumeration>>
-        USER
-        ASSISTANT
-        SYSTEM
-    }
-    
-    class SkillSystem {
-        <<enumeration>>
-        ESCO
-    }
-    
-    %% LLM Classes
-    class BaseLLM {
-        <<abstract>>
-        +str model_name
-        +ModelConfig config
-        +chat(chat_session, db_session)*
-        +extract_skills(instruction, message)*
-        +map_skill(instruction, skill, available_skills)*
-    }
-    
-    class OpenAILLM {
-        +OpenAI client
-        +chat(chat_session, db_session)
-        +extract_skills(instruction, message)
-        +map_skill(instruction, skill, available_skills)
-    }
-    
-    %% Skill Classes
-    class BaseSkill {
-        <<abstract>>
-    }
-    
-    class CustomSkill {
-        +str name
-        +Literal type
-        +float confidence
-        +str evidence
-    }
-    
-    class ESCOSkill {
-        +str uri
-        +str title
-        +str reference_language
-        +Dict~str,str~ preferred_label
-        +Dict~str,str~ description
-        +dict links
-        +get_preferred_label(language)
-        +get_description(language)
-    }
-    
-    class SkillList {
-        +List~BaseSkill~ skills
-        +get_skill_by_id(id)
-    }
-    
-    class CustomSkillList {
-        +List~CustomSkill~ skills
-        +get_skill_by_id(id)
-    }
-    
-    %% Model Configuration
-    class ModelConfig {
-        +float temperature
-        +int max_tokens
-        +float top_p
-        +List~str~ stop
-        +to_dict()
-    }
-    
-    class ModelConfigOpenAI {
-        +str response_format
-        +int seed
-        +List~dict~ tools
-        +str tool_choice
-        +str user
-        +Dict~int,float~ logit_bias
-        +bool logprobs
-        +int top_logprobs
-    }
-    
-    %% Database Handlers
-    class BaseSkillDatabaseHandler {
-        <<abstract>>
-        +str url
-    }
-    
-    class ESCODatabase {
-        +str language
-        +search_skills(text, limit)
-    }
-    
-    %% FastAPI Application
-    class FastAPI {
-        +lifespan()
-        +add_middleware()
-        +include_router()
-    }
-    
-    %% Router Classes
-    class UsersRouter {
-        +register_user()
-        +login_user()
-        +get_user()
-        +list_users()
-    }
-    
-    class SessionsRouter {
-        +create_session()
-        +get_user_sessions()
-        +get_session()
-        +update_session()
-        +get_session_messages()
-        +get_session_skills()
-        +get_all_session_skills()
-    }
-    
-    class ChatRouter {
-        +chat_with_user()
-        +set_dependencies()
-        +get_llm()
-        +get_esco_database_handler()
-    }
-    
-    class SkillsRouter {
-        +get_skill_systems()
-    }
-    
-    %% Authentication
-    class Auth {
-        +create_access_token()
-        +verify_token()
-        +get_current_user()
-    }
-    
-    %% Relationships
-    User --o ChatSession : "has"
-    ChatSession --o ChatMessage : "contains"
-    ChatSession --o ESCOSkillModel : "has"
-    ChatMessage --o ESCOSkillModel : "derives"
-    ChatSkillBase <|-- ESCOSkillModel : "inherits"
-    BaseLLM <|-- OpenAILLM : "implements"
-    BaseSkill <|-- CustomSkill : "inherits"
-    BaseSkill <|-- ESCOSkill : "inherits"
-    SkillList <|-- CustomSkillList : "inherits"
-    ModelConfig <|-- ModelConfigOpenAI : "inherits"
-    BaseSkillDatabaseHandler <|-- ESCODatabase : "inherits"
-    
-    FastAPI --> UsersRouter : "includes"
-    FastAPI --> SessionsRouter : "includes"
-    FastAPI --> ChatRouter : "includes"
-    FastAPI --> SkillsRouter : "includes"
-    
-    ChatRouter --> BaseLLM : "uses"
-    ChatRouter --> ESCODatabase : "uses"
-    OpenAILLM --> ModelConfigOpenAI : "configures"
-    OpenAILLM --> ChatMessage : "creates"
-    OpenAILLM --> ESCOSkillModel : "maps to"
-```
-
-### Class Descriptions
-
-#### Database Models
-- **User**: Represents application users with authentication and chat session management
-- **ChatSession**: Manages chat conversations and their associated messages and skills
-- **ChatMessage**: Individual messages within chat sessions with metadata
-- **ESCOSkillModel**: ESCO skill mappings extracted from chat conversations
-- **ChatSkillBase**: Abstract base class for different skill system implementations
-
-#### Core Classes
-- **BaseLLM**: Abstract base class for LLM implementations
-- **OpenAILLM**: Concrete OpenAI API implementation
-- **BaseSkill**: Abstract base for skill representations
-- **ESCOSkill**: ESCO skill data structure
-- **CustomSkill**: User-defined skill extraction
-
-#### Configuration & Handlers
-- **ModelConfig**: Base configuration for LLM models
-- **ModelConfigOpenAI**: OpenAI-specific configuration options
-- **BaseSkillDatabaseHandler**: Abstract base for skill database handlers
-- **ESCODatabase**: ESCO API integration for skill search
-
-#### FastAPI Components
-- **FastAPI**: Main application instance
-- **UsersRouter**: User management endpoints
-- **SessionsRouter**: Chat session management
-- **ChatRouter**: Core chat functionality
-- **SkillsRouter**: Skill-related endpoints
-- **Auth**: JWT authentication and user verification
-
-### Relationships
-
-- **Composition**: Users have chat sessions, sessions contain messages and skills
-- **Inheritance**: Multiple classes extend abstract base classes
-- **Association**: Routers use LLM and database handlers
-- **Dependency**: FastAPI includes various router modules
 
 ## 🗄️ Database Design
 
@@ -659,6 +348,7 @@ erDiagram
         int user_id PK "Primary Key, Auto-increment"
         varchar username UK "Unique, Max 100 chars, Indexed"
         varchar email UK "Unique, Max 255 chars, Indexed"
+        bool is_admin "Default: False"
         datetime created_at "Default: Current timestamp"
     }
 
@@ -681,12 +371,24 @@ erDiagram
         varchar model "AI model used, Optional"
         datetime timestamp "Default: Current timestamp, Indexed"
     }
+    
+    %% Custom Skills
+    CustomSkill {
+        int id PK "Primary Key, Auto-increment"
+        int session_id FK "Foreign Key to ChatSession"
+        int origin_message_id FK "Foreign Key to ChatMessage"
+        varchar name "Max 255 chars"
+        enum type "TECHNICAL, SOFT, etc."
+        float confidence "0.0 - 1.0"
+        text evidence "Source text"
+        datetime created_at
+    }
 
     %% ESCO Skills
     ESCOSkill {
         int id PK "Primary Key, Auto-increment"
         int session_id FK "Foreign Key to ChatSession"
-        int origin_message_id FK "Foreign Key to ChatMessage"
+        int custom_skill_id FK "Foreign Key to CustomSkill"
         enum skill_system "ESCO, Indexed"
         varchar uri "Max 255 chars, ESCO URI"
         varchar title "Max 255 chars, Skill title"
@@ -694,13 +396,16 @@ erDiagram
         json preferred_label "Multi-language labels"
         json description "Multi-language descriptions"
         json links "Additional metadata links"
+        text evidence "Optional evidence override"
     }
 
     %% Relationships
     User ||--o{ ChatSession : "has"
     ChatSession ||--o{ ChatMessage : "contains"
-    ChatSession ||--o{ ESCOSkill : "extracts"
-    ChatMessage ||--o{ ESCOSkill : "generates"
+    ChatSession ||--o{ CustomSkill : "extracts"
+    ChatSession ||--o{ ESCOSkill : "maps"
+    ChatMessage ||--o{ CustomSkill : "derives"
+    CustomSkill ||--o{ ESCOSkill : "maps_to"
 ```
 
 ### Database Configuration
@@ -716,8 +421,9 @@ erDiagram
 ### Frontend
 - **HTML/CSS/JavaScript**: Static web interface
 - **Chat Interface**: Real-time chat functionality
-- **User Management**: Registration, login, profile
-- **Skills Display**: Visual representation of extracted skills
+- **User Management**: Registration, login, profile, admin panel
+- **Skills Display**: Visual representation of extracted skills using Chart.js
+- **Internationalization**: Built-in translation support
 
 ### Backend
 - **FastAPI**: Modern Python web framework
@@ -769,23 +475,30 @@ BachelorThesis/
 │   │   └── utils.py               # Database utilities
 │   ├── logging_config.py          # Logging configuration
 │   ├── prompts.yaml               # AI prompt templates
+│   ├── visualization/             # Visualization logic
+│   │   └── processor.py           # Data processing for charts
 │   ├── routers/                   # API route handlers
 │   │   ├── __init__.py
 │   │   ├── chat.py                # Chat functionality
 │   │   ├── sessions.py            # Session management
 │   │   ├── skills.py              # Skills management
 │   │   ├── users.py               # User management
+│   │   ├── visualization.py       # Visualization endpoints
 │   │   └── utils.py               # Utility endpoints
 │   ├── schemas.py                 # Pydantic schemas
 │   └── utils.py                   # Utility functions
 ├── Frontend/                       # Frontend web application
+│   ├── admin.html                 # Admin dashboard
 │   ├── chat.html                  # Chat interface
 │   ├── documentation.html         # API documentation
 │   ├── index.html                 # Main landing page
 │   ├── js/                        # JavaScript files
 │   │   ├── api.js                 # API client
 │   │   ├── chat.js                # Chat functionality
-│   │   └── config.js              # Configuration
+│   │   ├── config.js              # Configuration
+│   │   ├── i18n.js                # Internationalization
+│   │   ├── skills_viz.js          # Skill visualization logic
+│   │   └── translations.js        # Translation strings
 │   ├── skills.html                # Skills visualization
 │   ├── style.css                  # Styling
 │   └── user.html                  # User management
@@ -814,17 +527,22 @@ BachelorThesis/
    ```bash
    pip install -r requirements.txt
    ```
-3. Set environment variables:
-   - `OPENAI_API_KEY`: Your OpenAI API key (see Configuration section below)
+3. Set environment variables in a `.env` file (see `.env.example`):
+   - `OPENAI_API_KEY`: Your OpenAI API key (Required)
+   - `PROMPT_FILE`: Path to prompts configuration (Default: Backend/prompts.yaml)
+   - `DATABASE_URL`: Database connection string
+   - `DB_ECHO`: Enable SQL query logging (true/false)
+   
 4. Run the application: `python app.py`
 
 ### Usage
 
-1. Open your browser and navigate to the application
+1. Open your browser and navigate to the application (http://localhost:8000)
 2. Register a new account or login
+   - *Note: To access admin features, an admin user must be created via database or initial setup*
 3. Start a new chat session
 4. Begin conversing with the AI chatbot
-5. View extracted skills and competencies
+5. View extracted skills and competencies in the **Skills** section with the new interactive visualizations
 
 ## 🔧 Configuration
 
@@ -841,8 +559,10 @@ The application can be configured through environment variables:
 ### Optional Configuration
 
 - `DATABASE_URL`: Database connection string (defaults to SQLite)
-- `SECRET_KEY`: JWT secret key (auto-generated if not provided)
-- `LOG_LEVEL`: Logging level (defaults to INFO)
+- `PROMPT_FILE`: Path to the prompts configuration file
+- `DB_POOL_SIZE`: Database connection pool size
+- `DB_MAX_OVERFLOW`: Max overflow connections
+- `DB_POOL_TIMEOUT`: Connection timeout setting
 
 ## 📊 Evaluation
 
