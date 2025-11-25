@@ -92,12 +92,10 @@ async def get_esco_visualizations(
         
         skills_data.append(skill_dict)
     
-    hierarchy = processor.process_esco_hierarchy(skills_data)
     occupations = processor.match_occupations(skills_data)
     radar = processor.process_radar_data(skills_data)
     
     return {
-        "sunburst": hierarchy,
         "occupations": occupations,
         "radar": radar
     }

@@ -1,7 +1,6 @@
 // Global chart instances
 let donutChart = null;
 let densityChart = null;
-let sunburstChartInstance = null;
 let radarChartInstance = null;
 
 async function loadVisualizations(sessionId, skillSystem = 'CUSTOM') {
@@ -68,17 +67,6 @@ function clearCustomCharts() {
 }
 
 function clearEscoCharts() {
-    // Clear Sunburst Chart
-    const sunburstCanvas = document.getElementById('sunburstChart');
-    if (sunburstChartInstance) {
-        sunburstChartInstance.destroy();
-        sunburstChartInstance = null;
-        if (sunburstCanvas) {
-            const ctx = sunburstCanvas.getContext('2d');
-            ctx.clearRect(0, 0, sunburstCanvas.width, sunburstCanvas.height);
-        }
-    }
-    
     // Clear Radar Chart
     const radarCanvas = document.getElementById('radarChart');
     if (radarChartInstance) {
@@ -103,13 +91,11 @@ function renderCustomCharts(data) {
     // Show Custom chart containers, hide ESCO ones
     const donutContainer = document.getElementById('donutChart')?.parentElement;
     const densityContainer = document.getElementById('densityChart')?.parentElement;
-    const sunburstContainer = document.getElementById('sunburstChart')?.parentElement;
     const radarContainer = document.getElementById('radarChart')?.parentElement;
     const occupationContainer = document.getElementById('occupationList')?.parentElement;
     
     if (donutContainer) donutContainer.style.display = 'block';
     if (densityContainer) densityContainer.style.display = 'block';
-    if (sunburstContainer) sunburstContainer.style.display = 'none';
     if (radarContainer) radarContainer.style.display = 'none';
     if (occupationContainer) occupationContainer.style.display = 'none';
 
@@ -168,60 +154,15 @@ function renderEscoCharts(data) {
     // Show ESCO chart containers, hide Custom ones
     const donutContainer = document.getElementById('donutChart')?.parentElement;
     const densityContainer = document.getElementById('densityChart')?.parentElement;
-    const sunburstContainer = document.getElementById('sunburstChart')?.parentElement;
     const radarContainer = document.getElementById('radarChart')?.parentElement;
     const occupationContainer = document.getElementById('occupationList')?.parentElement;
     
     if (donutContainer) donutContainer.style.display = 'none';
     if (densityContainer) densityContainer.style.display = 'none';
-    if (sunburstContainer) sunburstContainer.style.display = 'block';
     if (radarContainer) radarContainer.style.display = 'block';
     if (occupationContainer) occupationContainer.style.display = 'block';
 
-    // Sunburst Proxy (Doughnut of Top Level Categories)
-    const hierarchyData = {
-        labels: [],
-        datasets: [{
-            data: [],
-            backgroundColor: []
-        }]
-    };
-    
-    const colors = [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
-        '#C9CBCF', '#FF9F40', '#4BC0C0', '#FF6384', '#36A2EB'
-    ];
-
-    if (data.sunburst && data.sunburst.children) {
-        data.sunburst.children.forEach((child, index) => {
-            hierarchyData.labels.push(child.name);
-            // Aggregate count of children
-            const count = child.children ? child.children.length : 0;
-            hierarchyData.datasets[0].data.push(count);
-            hierarchyData.datasets[0].backgroundColor.push(colors[index % colors.length]);
-        });
-    }
-
-    // Render Hierarchy Chart
-    const sunburstCanvas = document.getElementById('sunburstChart');
-    if (sunburstCanvas) {
-        const sunburstCtx = sunburstCanvas.getContext('2d');
-        if (sunburstChartInstance) sunburstChartInstance.destroy();
-        
-        sunburstChartInstance = new Chart(sunburstCtx, {
-            type: 'doughnut',
-            data: hierarchyData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'right' },
-                    title: { display: true, text: 'Skill Hierarchy (Top Level)' }
-                }
-            }
-        });
-    }
-
-    // Radar Chart (Pillars)
+    // Radar Chart (Skill Groups)
     const radarCanvas = document.getElementById('radarChart');
     if (radarCanvas && data.radar) {
         const radarCtx = radarCanvas.getContext('2d');
@@ -239,7 +180,7 @@ function renderEscoCharts(data) {
                     }
                 },
                 plugins: {
-                    title: { display: true, text: 'Skill Pillars' }
+                    title: { display: true, text: 'Skill Groups' }
                 }
             }
         });
@@ -263,9 +204,12 @@ function renderEscoCharts(data) {
                 li.style.justifyContent = 'space-between';
                 li.style.alignItems = 'center';
                 
+                const total = occ.total ? occ.total : 0;
+                const matchText = total > 0 ? `${occ.count}/${total} matches` : `${occ.count} matches`;
+
                 li.innerHTML = `
                     <span style="font-weight: 500;">${occ.title}</span>
-                    <span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">${occ.count} matches</span>
+                    <span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">${matchText}</span>
                 `;
                 ul.appendChild(li);
             });
